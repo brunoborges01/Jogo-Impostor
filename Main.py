@@ -5,199 +5,135 @@ def limpar_tela():
     os.system('cls')
     
 def limpar_tela_enter():
-    input("Pressione [ENTER]...")
+    input("\nPressione [ENTER] para continuar...")
     os.system('cls')
 
-# --- CONFIGURAÇÕES E PLACAR ---
-jogadores = ["BRUNO", "JULIA", "LUAN", "GIOVANA"]
-lista_votacao = []
-placar = {}
-#Definindo a estrutura do placar
-for i, nome in enumerate(jogadores):
-       placar.setdefault(nome, 0)
+limpar_tela()
 
-impostor = random.choice(jogadores)
-print(f"{impostor}")
-limpar_tela_enter()
-"""
+# --- CONFIGURAÇÕES INICIAIS ---
+jogadores = []
+placar = {}
+comidas = ["Açaí", "Alfajor", "Arroz Doce", "Bacon", "Batata Frita", "Beijinho", "Bicho de Pé", "Bife à Parmegiana", "Bolo de Cenoura", "Bolo de Chocolate", "Brigadeiro", "Brownie", "Cachorro Quente", "Cajuzinho", "Canjica", "Cheesecake", "Churros", "Cocada", "Coxinha", "Croissant", "Doce de Leite", "Empanada", "Esfiha", "Farofa", "Feijoada", "Frango Assado", "Frango Frito", "Goiabada", "Hambúrguer", "Kibe", "Lasanha", "Macarrão", "Mandioca Frita", "Misto Quente", "Mousse", "Nhoque", "Omelete", "Paçoca", "Pamonha", "Panqueca", "Pastel", "Pão Francês", "Pão de Alho", "Pão de Mel", "Pão de Queijo", "Pé de Moleque", "Picanha", "Pipoca", "Pizza", "Polenta", "Pudim", "Purê de Batata", "Risoto", "Salada", "Sanduíche Natural", "Sashimi", "Sonho", "Sopa", "Sorvete", "Strogonoff", "Sushi", "Suspiro", "Tacos", "Tapioca", "Temaki", "Torresmo", "Torta de Limão", "Trufa", "Waffle", "Yakisoba"]
+perguntas = ["Você prefere comer isso no café da manhã, almoço, janta ou na madrugada?", "É o tipo de comida que você divide com os outros ou come escondido para não dar um pedaço?", "Isso combina mais com um refrigerante trincando, um suco natural ou uma cerveja?", "Qual o molho que não pode faltar de jeito nenhum na hora de comer isso?", "Você acha que essa comida fica melhor no dia seguinte, depois de 'curtir' na geladeira?", "Isso faz muita sujeira para comer ou dá para comer no sofá de boa sem sujar nada?", "Você tem alguma memória de infância ligada a essa comida?", "Dá para comer isso todo dia ou é daquelas coisas que enjoam fácil?", "Você prefere a versão caseira ou a comprada pronta no restaurante/fast-food?", "Se você tivesse que comer isso pelo resto da vida, você aguentaria?", "É melhor comer isso quando está chovendo e fazendo frio, ou num dia ensolarado?", "Você já tentou fazer isso em casa e a receita deu completamente errado?", "Qual o acompanhamento perfeito que eleva essa comida para outro nível?", "Isso é comida de fim de semana ou é o que salva na correria da semana?", "Você come isso puro ou gosta de misturar tudo no prato antes de dar a primeira garfada?", "Tem alguma versão 'gourmet' disso que você acha pura frescura e prefere a tradicional?", "É o tipo de coisa que você come quando está triste para dar aquela melhorada no humor?", "Você costuma pedir isso no delivery ou prefere sair de casa para comer na hora?", "Já passou mal de tanto comer isso e prometeu que nunca mais ia comer (mas voltou)?", "Se tivesse que tirar um ingrediente clássico dessa receita para sempre, qual você tiraria?", "Você acha que essa comida é superestimada (famosa à toa) ou merece mesmo a fama que tem?", "Combina mais assistir a um filme comendo isso no sofá ou numa mesa conversando com amigos?", "Você gosta disso com muita pimenta ou prefere zero ardência?", "É uma comida que pesa e enche rápido ou dá para comer um monte sem perceber?", "Você prefere as bordas e partes crocantes ou o meinho que é mais macio/cremoso?", "Como é o cheiro que essa comida deixa na casa quando está sendo preparada?", "Você costuma tacar queijo extra nisso ou acha que estraga o sabor original?", "Já comeu alguma versão vegana ou vegetariana disso que te surpreendeu de verdade?", "Isso é o tipo de prato que você só sabe fazer lendo a receita passo a passo ou faz de olho?", "Qual a bebida que menos combina com isso e que estragaria toda a sua experiência?", "Você tem algum jeito esquisito ou diferente da maioria das pessoas na hora de comer isso?", "É uma comida que te dá aquele sono pesado depois de comer ou te dá energia?", "Você acha que a aparência dessa comida importa ou sendo gostosa é o que vale, mesmo sendo feia?", "Isso para você funciona como o prato principal ou serve mais como um petisco/entrada?", "Qual o maior crime ou erro que alguém pode cometer na hora de preparar isso?", "Você prefere a textura mais firme e crocante ou aquela que derrete na boca?", "Essa comida te lembra alguma viagem específica ou lugar que você já visitou?", "Você costuma raspar o prato ou a panela até o final quando come isso?", "É o tipo de coisa que você come com pressa de pé ou gosta de sentar e saborear cada mordida?", "Você já comeu isso em alguma barraca de rua pós-festa de madrugada?", "Qual a pior versão ou sabor bizarro dessa comida que você já teve o desprazer de provar?", "Você costuma afogar isso no ketchup e na maionese ou prefere manter o gosto original?", "Dá para levar isso na marmita para o trabalho ou fica com gosto de geladeira depois de requentar?", "Você acha que essa comida costuma ser cara para o que oferece ou é um bom custo-benefício?", "Isso realmente mata a sua fome de leão ou você come só pela pura gula de mastigar algo?", "Qual o tamanho ideal da porção disso para você sair da mesa 100% satisfeito?", "Você gosta de comer isso misturado com coisas doces (pegada agridoce) ou acha isso bizarro?", "Essa é a comida que você pediria como sua 'última refeição' se pudesse escolher?", "Você prefere comprar os ingredientes soltos e montar do seu jeito ou comprar o kit todo pronto?", "É fácil achar um lugar bom que venda isso na sua cidade ou é quase uma caça ao tesouro?"]
+
+# --- MENU PRINCIPAL ---
 while True:
     print("Jogo do Impostor\n1 - Adicionar Jogador.\n2 - Remover Jogador\n3 - Iniciar o Jogo.")
-    if len(jogadores) != 0:
-       print(*jogadores, sep=", ")
-    escolha = int(input("\nEscolha um numero: "))
-    
-    match escolha:
-        case 1:
-            nome = input("Nome do Jogador para adicionar: ")
-            jogadores.append(nome)
-            limpar_tela()
-        case 2: 
-            nome = input("Nome do Jogador para remover: ")
-            if nome in jogadores:
-                jogadores.remove(nome)
+    if jogadores: print(f"Lista de Jogadores: {', '.join(jogadores)}")
+    try:
+        escolha = int(input("\nEscolha um numero: "))
+        match escolha:
+            case 1: jogadores.append(input("Nome: ").title()); limpar_tela()
+            case 2:
+                nome = input("Nome a remover: ").title()
+                if nome in jogadores: jogadores.remove(nome)
                 limpar_tela()
-            else:
-                print("Nome do jogador não encontrado na lista de jogadores") 
-                limpar_tela_enter()
-        case 3:
-            if len(jogadores) < 3:
-                print("Quantidade de jogadores minima não atingida.")
-                limpar_tela_enter()
-            else:
-                break
+            case 3:
+                if len(jogadores) < 3: print("Mínimo 3 jogadores."); limpar_tela_enter()
+                else: break
+    except ValueError: print("Digite apenas números."); limpar_tela_enter()
 
+for nome in jogadores: placar[nome] = 0
+comidas_usadas = []
 
-
-
-comidas = [
-
-    "Pizza", "Sushi", "Hambúrguer", "Sopa", 
-    "Churrasco", "Salada", "Sorvete"
-]
-
-perguntas = [
-    "Você costuma comer isso com as mãos ou precisa obrigatoriamente de talheres?", 
-    "Isso é melhor servido bem quente, gelado ou em temperatura ambiente?", 
-    "Dá para preparar isso rapidinho no micro-ondas ou exige um bom tempo de fogão/forno?",
-    "Qual o ingrediente mais estranho que você já colocou nisso?"
-]
-
-# --- 1. SORTEIO INICIAL ---
-impostor = random.choice(jogadores)
-comida_sorteada = random.choice(comidas)
-
-limpar_tela()
-print("--- O JOGO VAI COMEÇAR ---")
-
-# --- 2. FASE DE REVELAÇÃO (SEGREDOS) ---
-for jogador in jogadores:
-    input(f"\nPasse a tela para {jogador.title()} e aperte [ENTER] para revelar seu segredo...")
-    limpar_tela()
+# --- LOOP DE RODADAS ---
+while True:
+    comidas_disponiveis = [c for c in comidas if c not in comidas_usadas]
+    if not comidas_disponiveis: print("Acabaram as comidas!"); break
     
-    print(f"👁️ --- SEGREDO DE {jogador.upper()} --- 👁️\n")
+    comida_sorteada = random.choice(comidas_disponiveis)
+    comidas_usadas.append(comida_sorteada)
+    impostor = random.choice(jogadores)
+    votos_recebidos = {jogador: 0 for jogador in jogadores}
+
+    # Revelação
+    for jogador in jogadores:
+        input(f"\nPasse a tela para {jogador} e aperte [ENTER]..."); limpar_tela()
+        print(f"--- SEGREDO DE {jogador.upper()} ---\n")
+        if jogador == impostor: print("🚨 VOCÊ É O IMPOSTOR! 🚨")
+        else: print(f"✅ VOCÊ É CIDADÃO!\nComida: {comida_sorteada}")
+        input("\n[ENTER] para esconder..."); limpar_tela()
+
+    # Perguntas
+    p = random.sample(jogadores, len(jogadores))
+    r = p[1:] + [p[0]]
+    perguntas_sort = random.sample(perguntas, len(jogadores))
+    for qp, qr, perg in zip(p, r, perguntas_sort):
+        input("Próxima pergunta..."); limpar_tela(); print(f"🎙️ {qp} pergunta para {qr}:\n 💬 {perg}\n")
     
-    if jogador == impostor:
-        print("🚨 VOCÊ É O IMPOSTOR! 🚨")
-        print("Tente descobrir qual é a comida da rodada através das perguntas!")
-    else:
-        print("✅ VOCÊ É UM CIDADÃO!")
-        print(f"A comida da rodada é: ---> {comida_sorteada} <---")
-        print("Cuidado para não ser muito óbvio e o impostor descobrir!")
-        
-    input("\nAperte [ENTER] para esconder a tela...")
-    limpar_tela()
-
-# --- 3. FASE DE PERGUNTAS ---
-# Cria a roda de perguntas
-perguntadores = random.sample(jogadores, len(jogadores))
-respondedores = perguntadores[1:] + [perguntadores[0]]
-perguntas_sorteadas = random.sample(perguntas, len(jogadores))
-
-print("====================================")
-print("🎲 HORA DAS PERGUNTAS! 🎲")
-print("====================================\n")
-
-for quem_pergunta, quem_responde, pergunta in zip(perguntadores, respondedores, perguntas_sorteadas):
-    input("Aperte [ENTER] para ver a próxima pergunta...")
-    limpar_tela()
-    
-    print(f"🎙️ {quem_pergunta.title()} pergunta para {quem_responde.title()}:")
-    print(f"   💬 {pergunta}\n")
-"""
-limpar_tela()
-# --- 4. FASE DE VOTAÇÃO ---   
-
-# Cria um dicionário zerado para contar os votos que cada jogador vai receber
-votos_recebidos = {jogador: 0 for jogador in jogadores}
-
-print("====================================")
-print("HORA DA VOTAÇÃO!")
-print("====================================\n")
-limpar_tela_enter()
-
-for jogador in jogadores:
-    print(f"Vez de: {jogador}")
     limpar_tela_enter()
-
-    # O impostor agora vota normalmente, então removemos o "if jogador == impostor" que pulava a vez
-
-    # Cria a lista de opções excluindo o jogador atual
-    opcoes_voto = [j for j in jogadores if j != jogador]
-
-    while True:
-        print("Lista de jogadores para votar:")
-        for indice, nome in enumerate(opcoes_voto):
-            print(f"{indice} - {nome}")
+    # Votação Corrigida
+    for jogador in jogadores:
+        print(f"Vez de: {jogador}")
+        opcoes = [j for j in jogadores if j != jogador]
         
-        try:
-            voto_indice = int(input("Digite o número de quem quer votar: "))
+        while True: # Adicionamos um loop para garantir que o voto seja válido
+            for i, nome in enumerate(opcoes): 
+                print(f"{i} - {nome}")
             
-            # Valida se o voto está dentro do limite da lista
-            if 0 <= voto_indice < len(opcoes_voto):
-                voto_nome = opcoes_voto[voto_indice]
-                
-                # 1. Registra o voto que o jogador alvo recebeu
-                votos_recebidos[voto_nome] += 1
-                
-                # 2. Contagem de pontos (Placar): 
-                # Só ganha ponto se votou no impostor E se quem está votando NÃO for o próprio impostor
-                if voto_nome == impostor and jogador != impostor:
-                    placar[jogador] += 1
-                    
-                limpar_tela_enter()
-                break # Encerra o turno deste jogador
+            try:
+                voto = int(input("Número: "))
+                # Valida se o número está dentro das opções disponíveis
+                if 0 <= voto < len(opcoes):
+                    alvo = opcoes[voto]
+                    votos_recebidos[alvo] += 1
+                    if alvo == impostor and jogador != impostor: 
+                        placar[jogador] += 1
+                    break # Sai do while apenas se o voto for válido
+                else:
+                    print("Número inválido! Escolha um da lista acima.")
+            except ValueError:
+                print("Entrada inválida! Digite apenas o número.")
+        
+        limpar_tela()
+
+    # Resultado e Mecânicas do Impostor
+    max_votos = max(votos_recebidos.values())
+    mais_votados = [j for j, v in votos_recebidos.items() if v == max_votos]
+
+    # BÔNUS: Impostor ganha +2 se não for a maioria dos votos
+    if  impostor not in mais_votados  :
+        print("🎉 O Impostor sobreviveu à votação e ganhou 2 pontos!")
+        placar[impostor] += 2
+        print(f"🔥 Eliminado: {eliminado}")
+        eliminado = mais_votados[0]
+    elif len(mais_votados) > 1:
+        print(f"⚖️ EMPATE entre {', '.join(mais_votados)}")
+        if impostor in mais_votados:
+            print("🎉 O Impostor sobreviveu à votação e ganhou 2 pontos!")
             
-            else:
-                print("Voto inválido. Escolha um número da lista.")
-                limpar_tela_enter()
-                
-        except ValueError:
-            # Evita que o programa quebre se o usuário digitar uma letra
-            print("Entrada inválida. Por favor, digite apenas números.")
-            limpar_tela_enter()
-
-
-# --- APURAÇÃO DA VOTAÇÃO ---
-limpar_tela()
-print("====================================")
-print("RESULTADO DA VOTAÇÃO DA CASA")
-print("====================================\n")
-
-# Exibe quantos votos cada um recebeu
-for nome, qtd_votos in votos_recebidos.items():
-    print(f"{nome}: {qtd_votos} voto(s)")
-
-print("-" * 30)
-
-# Descobre qual foi o número máximo de votos recebidos por alguém
-max_votos = max(votos_recebidos.values())
-
-# Filtra quem recebeu esse número máximo de votos (pode haver empate)
-mais_votados = [nome for nome, votos in votos_recebidos.items() if votos == max_votos]
-
-# Exibe o resultado final
-if len(mais_votados) > 1:
-    print(f"Houve um empate! Os mais votados foram: {', '.join(mais_votados)} com {max_votos} votos.")
-else:
-    print(f"O jogador mais expulso/votado foi: {mais_votados[0]} com {max_votos} votos.")
-
-# Verifica se a casa conseguiu votar no impostor
-if impostor in mais_votados:
-    print("\n🎯 A casa conseguiu identificar e eliminar o impostor!")
-else:
-    placar[impostor] += 2
-    print(f"\n❌ A casa eliminou um inocente! O impostor era {impostor}.")
-
-limpar_tela_enter()
+        
+    # Palpite do Impostor
+    print(f"\n🤐 O Impostor era: {impostor}")
+    opcoes_palpite = random.sample([c for c in comidas if c != comida_sorteada], 4) + [comida_sorteada]
+    random.shuffle(opcoes_palpite)
     
-# --- 5. PONTOS DE CADA JOGADOR ---
-print("\n====================================")
-print("PLACAR FINAL")
-print("====================================\n")
+    print(f"\n{impostor}, você foi descoberto! Qual era a comida secreta?")
+    for i, c in enumerate(opcoes_palpite): print(f"{i} - {c}")
+    
+    # Loop para garantir uma entrada válida
+    while True:
+        try:
+            palpite = int(input("Escolha o número da comida (0-4): "))
+            if 0 <= palpite <= 4:
+                if opcoes_palpite[palpite] == comida_sorteada:
+                    print("🎯 ACERTOU! O impostor ganha +1 ponto!")
+                    placar[impostor] += 1
+                else:
+                    print(f"❌ Errou! A comida era {comida_sorteada}.")
+                break # Sai do while se a entrada for válida
+            else:
+                print("Por favor, digite um número entre 0 e 4.")
+        except ValueError:
+            print("Entrada inválida! Digite apenas o número correspondente.")
 
-# Ordena o placar do maior para o menor (reverse=True)
-placar_ordenado = sorted(placar.items(), key=lambda item: item[1], reverse=True)
+    print("\n🏆 PLACAR 🏆")
+    for pos, (nome, pts) in enumerate(sorted(placar.items(), key=lambda x: x[1], reverse=True), 1):
+        print(f"{pos}º | {nome}: {pts} ponto(s)")
 
-# Exibe o placar formatado com a posição de cada um
-for posicao, (nome, pontos) in enumerate(placar_ordenado, start=1):
-    print(f"{posicao}º Lugar | {nome}: {pontos} ponto(s)")
+    # Decisão de continuar
+    if len(comidas_usadas) < len(jogadores) or len(mais_votados) > 1:
+        if input("\nJogar mais uma? (s/n): ").lower() != 's': break
+    else: break
+    limpar_tela()
+
