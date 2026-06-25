@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo do Impostor</title>
     <style>
-        /* CSS focado em Mobile */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121212;
@@ -17,8 +16,7 @@
             align-items: center;
             text-align: center;
         }
-        h1 { color: #ff4757; }
-        /* O segredo para trocar de tela: esconder o que não está ativo */
+        h1, h2, h3 { color: #ff4757; }
         .tela { display: none; width: 100%; max-width: 400px; }
         .tela.ativa { display: block; }
         
@@ -27,13 +25,16 @@
             color: white;
             border: none;
             padding: 15px 20px;
-            margin: 10px 0;
+            margin: 8px 0;
             border-radius: 8px;
             font-size: 18px;
             width: 100%;
             cursor: pointer;
         }
         button:active { background-color: #ff6b81; }
+        .btn-verde { background-color: #2ed573; }
+        .btn-verde:active { background-color: #26b360; }
+        
         input {
             padding: 10px;
             font-size: 16px;
@@ -41,55 +42,102 @@
             border-radius: 8px;
             margin-bottom: 10px;
         }
-        .lista-jogadores { text-align: left; background: #1e1e1e; padding: 10px; border-radius: 8px; }
+        .lista-jogadores { text-align: left; background: #1e1e1e; padding: 10px; border-radius: 8px; margin-bottom: 20px; }
+        .placar-item { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 5px 0;}
     </style>
 </head>
 <body>
 
+    <!-- TELA 1: MENU PRINCIPAL -->
     <div id="tela-menu" class="tela ativa">
         <h1>Jogo do Impostor 🕵️‍♂️</h1>
         
         <div class="lista-jogadores">
-            <h3>Jogadores:</h3>
-            <ul id="lista-ul">
-                </ul>
+            <h3>Placar Atual:</h3>
+            <div id="lista-placar"></div>
         </div>
 
         <input type="text" id="novo-jogador" placeholder="Nome do jogador">
         <button onclick="adicionarJogador()">Adicionar Jogador</button>
-        <button onclick="iniciarJogo()" style="background-color: #2ed573;">Iniciar Jogo</button>
+        <button onclick="removerJogador()">Remover Último</button>
+        <button onclick="iniciarJogo()" class="btn-verde">Iniciar Jogo</button>
     </div>
 
+    <!-- TELA 2: PASSAR O CELULAR -->
     <div id="tela-passar" class="tela">
         <h2 id="texto-passar">Passe o celular para...</h2>
         <button onclick="revelarPapel()">Mostrar meu segredo</button>
     </div>
 
+    <!-- TELA 3: REVELAÇÃO -->
     <div id="tela-revelacao" class="tela">
         <h2 id="titulo-papel">--- SEGREDO ---</h2>
         <p id="texto-papel" style="font-size: 24px; font-weight: bold;"></p>
-        <button onclick="proximoJogador()">Entendi, esconder!</button>
+        <button onclick="proximoJogadorFaseRevelacao()">Entendi, esconder!</button>
+    </div>
+
+    <!-- TELA 4: PERGUNTAS -->
+    <div id="tela-perguntas" class="tela">
+        <h2>🎙️ Hora das Perguntas</h2>
+        <p id="texto-pergunta" style="font-size: 20px; background: #1e1e1e; padding: 15px; border-radius: 8px;"></p>
+        <button onclick="proximaPergunta()" class="btn-verde">Próxima Pergunta</button>
+    </div>
+
+    <!-- TELA 5: VOTAÇÃO -->
+    <div id="tela-votacao" class="tela">
+        <h2>⚖️ Votação</h2>
+        <h3 id="texto-vez-votar"></h3>
+        <p>Quem é o impostor?</p>
+        <div id="botoes-votos"></div>
+    </div>
+
+    <!-- TELA 6: RESULTADO -->
+    <div id="tela-resultado" class="tela">
+        <h2 id="titulo-resultado">Resultado da Rodada</h2>
+        <p id="texto-resultado" style="font-size: 20px;"></p>
+        <button onclick="mostrarTela('tela-menu')" class="btn-verde">Jogar Mais Uma</button>
+    </div>
+
+    <!-- TELA 7: PALPITE DO IMPOSTOR -->
+    <div id="tela-palpite" class="tela">
+        <h2>🤐 O Impostor era: <span id="nome-impostor-descoberto"></span></h2>
+        <p>Você foi descoberto! Qual era a comida secreta para ganhar 1 ponto de consolação?</p>
+        <div id="botoes-palpite"></div>
     </div>
 
     <script>
-        // --- VARIÁVEIS GLOBAIS (O "Estado" do seu jogo) ---
+        // --- VARIÁVEIS GLOBAIS ---
         let jogadores = ["Bruno", "Julia", "Celina"];
-        let historicoImpostores = [];
         let placar = {};
-        let comidas = ["Açaí", "Alfajor", "Arroz Doce", "Batata Frita", "Pizza", "Sushi"]; // Lista reduzida para teste
+        let historicoImpostores = [];
+        let comidasUsadas = [];
         
-        // Controles da rodada atual
+        let comidas = ["Açaí", "Alfajor", "Arroz Doce", "Bacon", "Batata Frita", "Beijinho", "Bife à Parmegiana", "Bolo de Cenoura", "Brigadeiro", "Cachorro Quente", "Churros", "Coxinha", "Croissant", "Feijoada", "Hambúrguer", "Lasanha", "Macarrão", "Misto Quente", "Omelete", "Panqueca", "Pastel", "Pão de Queijo", "Pipoca", "Pizza", "Pudim", "Salada", "Sorvete", "Strogonoff", "Sushi", "Yakisoba"];
+        let perguntas = ["Você prefere comer isso no café da manhã, almoço, janta ou na madrugada?", "É o tipo de comida que você divide ou come escondido?", "Combina mais com refri, suco natural ou cerveja?", "Qual o molho não pode faltar?", "Fica melhor no dia seguinte requentado?", "Faz muita sujeira para comer no sofá?", "Dá para comer todo dia ou enjoa?", "Você prefere a versão caseira ou comprada?", "Comeria pelo resto da vida?", "É comida de dia frio ou ensolarado?", "Qual o acompanhamento perfeito?", "É comida de fim de semana ou de correria?", "Você come triste para dar aquela melhorada no humor?", "Você costuma pedir no delivery ou sair para comer?", "Já passou mal de tanto comer isso?", "É uma comida superestimada ou merece a fama?", "É uma comida que pesa ou dá pra comer um monte?", "Como é o cheiro que deixa na casa?", "Você costuma raspar o prato/panela?"];
+        
+        // Controles de estado
         let impostorAtual = "";
         let comidaAtual = "";
         let indiceJogadorAtual = 0;
+        let indicePerguntaAtual = 0;
+        let p_perguntador = [];
+        let r_respondedor = [];
+        let perguntasSorteadas = [];
+        let votosRecebidos = {};
 
-        // Inicia o placar e renderiza o menu
+        // Inicia placar e interface
         function atualizarMenu() {
-            const ul = document.getElementById('lista-ul');
-            ul.innerHTML = '';
-            jogadores.forEach(j => {
-                ul.innerHTML += `<li>${j}</li>`;
-                if (!(j in placar)) placar[j] = 0;
+            const divPlacar = document.getElementById('lista-placar');
+            divPlacar.innerHTML = '';
+            
+            // Cria os jogadores no placar se não existirem
+            jogadores.forEach(j => { if (!(j in placar)) placar[j] = 0; });
+            
+            // Ordena o placar por pontos
+            let placarOrdenado = Object.keys(placar).sort((a, b) => placar[b] - placar[a]);
+            
+            placarOrdenado.forEach((j, index) => {
+                divPlacar.innerHTML += `<div class="placar-item"><span>${index + 1}º | ${j}</span> <span>${placar[j]} pts</span></div>`;
             });
         }
 
@@ -100,28 +148,45 @@
                 jogadores.push(nome);
                 input.value = '';
                 atualizarMenu();
-            } else {
-                alert("Nome inválido ou já existe!");
+            } else { alert("Nome inválido ou já existe!"); }
+        }
+
+        function removerJogador() {
+            if(jogadores.length > 0) {
+                let removido = jogadores.pop();
+                delete placar[removido];
+                atualizarMenu();
             }
         }
 
-        // --- NAVEGAÇÃO DE TELAS ---
         function mostrarTela(idTela) {
             document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
             document.getElementById(idTela).classList.add('ativa');
+            if (idTela === 'tela-menu') atualizarMenu();
         }
 
-        // --- LÓGICA DO JOGO ---
-        function iniciarJogo() {
-            if (jogadores.length < 3) {
-                alert("Mínimo de 3 jogadores!");
-                return;
+        // Embaralha um array (Função auxiliar)
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
             }
+            return array;
+        }
+
+        // --- FASE 1: INÍCIO E SORTEIO ---
+        function iniciarJogo() {
+            if (jogadores.length < 3) { alert("Mínimo de 3 jogadores!"); return; }
             
-            // Sorteia comida
-            comidaAtual = comidas[Math.floor(Math.random() * comidas.length)];
+            let comidasDisponiveis = comidas.filter(c => !comidasUsadas.includes(c));
+            if (comidasDisponiveis.length === 0) { alert("Acabaram as comidas!"); return; }
             
-            // Sorteia impostor (com a sua trava de 2 vezes!)
+            comidaAtual = comidasDisponiveis[Math.floor(Math.random() * comidasDisponiveis.length)];
+            comidasUsadas.push(comidaAtual);
+            
+            // Sorteia impostor com trava de 2 vezes
             let candidatos = [...jogadores];
             if (historicoImpostores.length >= 2) {
                 let ultimo = historicoImpostores[historicoImpostores.length - 1];
@@ -133,19 +198,21 @@
             impostorAtual = candidatos[Math.floor(Math.random() * candidatos.length)];
             historicoImpostores.push(impostorAtual);
 
-            // Reseta a fila para passar o celular
+            // Prepara a votação zerada
+            votosRecebidos = {};
+            jogadores.forEach(j => votosRecebidos[j] = 0);
+
             indiceJogadorAtual = 0;
             prepararPassarCelular();
         }
 
+        // --- FASE 2: REVELAÇÃO ---
         function prepararPassarCelular() {
             if (indiceJogadorAtual < jogadores.length) {
-                document.getElementById('texto-passar').innerText = `Passe o celular para ${jogadores[indiceJogadorAtual]}`;
+                document.getElementById('texto-passar').innerText = `Vez de: ${jogadores[indiceJogadorAtual]}\n\n(Esconda o celular dos outros)`;
                 mostrarTela('tela-passar');
             } else {
-                // Aqui iria para a tela de PERGUNTAS e VOTAÇÃO
-                alert("Fase de revelação acabou! (Aqui entrarão as perguntas e votação)");
-                mostrarTela('tela-menu'); // Voltando ao menu temporariamente
+                iniciarPerguntas(); // Vai para as perguntas!
             }
         }
 
@@ -157,18 +224,142 @@
                 document.getElementById('texto-papel').innerText = "🚨 VOCÊ É O IMPOSTOR! 🚨";
                 document.getElementById('texto-papel').style.color = "#ff4757";
             } else {
-                document.getElementById('texto-papel').innerText = `✅ VOCÊ É CIDADÃO!\nComida: ${comidaAtual}`;
+                document.getElementById('texto-papel').innerText = `✅ VOCÊ É CIDADÃO!\n\nA Comida é: ${comidaAtual}`;
                 document.getElementById('texto-papel').style.color = "#2ed573";
             }
             mostrarTela('tela-revelacao');
         }
 
-        function proximoJogador() {
+        function proximoJogadorFaseRevelacao() {
             indiceJogadorAtual++;
             prepararPassarCelular();
         }
 
-        // Inicializa a tela
+        // --- FASE 3: PERGUNTAS ---
+        function iniciarPerguntas() {
+            // Sorteia a ordem de perguntas (ex: A pergunta pro B, B pro C, C pro A)
+            p_perguntador = shuffle([...jogadores]);
+            r_respondedor = p_perguntador.slice(1).concat(p_perguntador[0]);
+            perguntasSorteadas = shuffle([...perguntas]).slice(0, jogadores.length);
+            
+            indicePerguntaAtual = 0;
+            mostrarProximaPergunta();
+        }
+
+        function mostrarProximaPergunta() {
+            if (indicePerguntaAtual < jogadores.length) {
+                let quemPergunta = p_perguntador[indicePerguntaAtual];
+                let quemResponde = r_respondedor[indicePerguntaAtual];
+                let qualPergunta = perguntasSorteadas[indicePerguntaAtual];
+                
+                document.getElementById('texto-pergunta').innerHTML = `<b>${quemPergunta}</b> pergunta para <b>${quemResponde}</b>:<br><br>💬 <i>"${qualPergunta}"</i>`;
+                mostrarTela('tela-perguntas');
+            } else {
+                iniciarVotacao();
+            }
+        }
+
+        function proximaPergunta() {
+            indicePerguntaAtual++;
+            mostrarProximaPergunta();
+        }
+
+        // --- FASE 4: VOTAÇÃO ---
+        function iniciarVotacao() {
+            indiceJogadorAtual = 0;
+            prepararVoto();
+        }
+
+        function prepararVoto() {
+            if (indiceJogadorAtual < jogadores.length) {
+                let jogadorVotando = jogadores[indiceJogadorAtual];
+                document.getElementById('texto-vez-votar').innerText = `Vez de ${jogadorVotando} votar:`;
+                
+                let divBotoes = document.getElementById('botoes-votos');
+                divBotoes.innerHTML = '';
+                
+                // Gera botões apenas para os OUTROS jogadores
+                jogadores.forEach(alvo => {
+                    if (alvo !== jogadorVotando) {
+                        let btn = document.createElement('button');
+                        btn.innerText = alvo;
+                        btn.onclick = () => registrarVoto(jogadorVotando, alvo);
+                        divBotoes.appendChild(btn);
+                    }
+                });
+                mostrarTela('tela-votacao');
+            } else {
+                calcularResultado();
+            }
+        }
+
+        function registrarVoto(quemVotou, alvo) {
+            votosRecebidos[alvo]++;
+            if (alvo === impostorAtual && quemVotou !== impostorAtual) {
+                placar[quemVotou] += 1; // Cidadão acertou, ganha 1 ponto
+            }
+            indiceJogadorAtual++;
+            prepararVoto();
+        }
+
+        // --- FASE 5: RESULTADOS ---
+        function calcularResultado() {
+            let maxVotos = Math.max(...Object.values(votosRecebidos));
+            let maisVotados = Object.keys(votosRecebidos).filter(j => votosRecebidos[j] === maxVotos);
+            
+            let texto = document.getElementById('texto-resultado');
+            texto.innerHTML = `O impostor era: <b>${impostorAtual}</b>!<br><br>`;
+            
+            if (!maisVotados.includes(impostorAtual)) {
+                texto.innerHTML += `🎉 O Impostor enganou a todos e ganhou +2 pontos!`;
+                placar[impostorAtual] += 2;
+                mostrarTela('tela-resultado');
+            } 
+            else if (maisVotados.length > 1 && maisVotados.includes(impostorAtual)) {
+                texto.innerHTML += `⚖️ Deu Empate! Mas o Impostor sobreviveu e ganhou +2 pontos!`;
+                placar[impostorAtual] += 2;
+                mostrarTela('tela-resultado');
+            } 
+            else {
+                // Impostor descoberto! Vai para o palpite.
+                prepararPalpiteComida();
+            }
+        }
+
+        function prepararPalpiteComida() {
+            document.getElementById('nome-impostor-descoberto').innerText = impostorAtual;
+            
+            // Gera 4 opções aleatórias + a certa
+            let outrasComidas = comidas.filter(c => c !== comidaAtual);
+            let opcoes = shuffle(outrasComidas).slice(0, 4);
+            opcoes.push(comidaAtual);
+            opcoes = shuffle(opcoes);
+
+            let divBotoes = document.getElementById('botoes-palpite');
+            divBotoes.innerHTML = '';
+            
+            opcoes.forEach(opcao => {
+                let btn = document.createElement('button');
+                btn.innerText = opcao;
+                btn.onclick = () => verificarPalpite(opcao);
+                divBotoes.appendChild(btn);
+            });
+            
+            mostrarTela('tela-palpite');
+        }
+
+        function verificarPalpite(palpite) {
+            let texto = document.getElementById('texto-resultado');
+            if (palpite === comidaAtual) {
+                placar[impostorAtual] += 1;
+                texto.innerHTML = `🚨 A casa caiu! O Impostor <b>${impostorAtual}</b> foi descoberto pela maioria...<br><br>🎯 MAS ACERTOU O PALPITE! Era ${comidaAtual}. (Ganhou +1 ponto)`;
+            } else {
+                texto.innerHTML = `🚨 A casa caiu! O Impostor <b>${impostorAtual}</b> foi descoberto.<br><br>❌ E errou o palpite! A comida era ${comidaAtual}.`;
+            }
+            mostrarTela('tela-resultado');
+        }
+
+        // Inicializa a tela com o menu montado
         atualizarMenu();
     </script>
 </body>

@@ -1,3 +1,4 @@
+"""
 import random
 import os
 
@@ -208,3 +209,4 @@ while True:
     
         
     limpar_tela()
+    """
