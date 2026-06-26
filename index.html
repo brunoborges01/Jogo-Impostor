@@ -131,6 +131,7 @@
         let r_respondedor = [];
         let perguntasSorteadas = [];
         let votosRecebidos = {};
+        let impostorFoiDescoberto = false;
 
         // --- MENU E JOGADORES ---
         function atualizarInterfaceMenu() {
@@ -350,27 +351,28 @@
             let maxVotos = Math.max(...Object.values(votosRecebidos));
             let maisVotados = Object.keys(votosRecebidos).filter(j => votosRecebidos[j] === maxVotos);
             
-            let texto = document.getElementById('texto-resultado');
-            texto.innerHTML = `O impostor era: <b>${impostorAtual}</b>!<br><br>`;
-            
-            if (!maisVotados.includes(impostorAtual)) {
-                texto.innerHTML += `🎉 O Impostor enganou a todos e ganhou +2 pontos!`;
-                placar[impostorAtual] += 2;
-                mostrarTela('tela-resultado');
-            } 
-            else if (maisVotados.length > 1 && maisVotados.includes(impostorAtual)) {
-                texto.innerHTML += `⚖️ Deu Empate! Mas o Impostor sobreviveu e ganhou +2 pontos!`;
-                placar[impostorAtual] += 2;
-                mostrarTela('tela-resultado');
-            } 
-            else {
-                prepararPalpiteComida();
+            // Verifica se o impostor escapou (não foi o mais votado OU houve empate)
+            if (!maisVotados.includes(impostorAtual) || (maisVotados.length > 1 && maisVotados.includes(impostorAtual))) {
+                impostorFoiDescoberto = false;
+                placar[impostorAtual] += 2; // Ganha 2 pontos por sobreviver
+            } else {
+                impostorFoiDescoberto = true;
             }
+
+            // O jogo SEMPRE vai para a tela de palpite agora
+            prepararPalpiteComida();
         }
 
         function prepararPalpiteComida() {
             document.getElementById('nome-impostor-descoberto').innerText = impostorAtual;
             
+            let textoInstrucao = document.getElementById('texto-instrucao-palpite');
+            if (impostorFoiDescoberto) {
+                textoInstrucao.innerText = "🚨 Você foi descoberto! Mas ainda pode tentar adivinhar a comida secreta para ganhar 2 pontos de consolação!";
+            } else {
+                textoInstrucao.innerText = "🎉 Você enganou a todos! Agora tente adivinhar a comida secreta para ganhar MAIS 2 pontos extras!";
+            }
+
             let outrasComidas = comidas.filter(c => c !== comidaAtual);
             let opcoes = shuffle(outrasComidas).slice(0, 4);
             opcoes.push(comidaAtual);
@@ -391,12 +393,29 @@
 
         function verificarPalpite(palpite) {
             let texto = document.getElementById('texto-resultado');
-            if (palpite === comidaAtual) {
-                placar[impostorAtual] += 1;
-                texto.innerHTML = `🚨 A casa caiu! O Impostor <b>${impostorAtual}</b> foi descoberto pela maioria...<br><br>🎯 MAS ACERTOU O PALPITE! Era ${comidaAtual}. (Ganhou +1 ponto)`;
-            } else {
-                texto.innerHTML = `🚨 A casa caiu! O Impostor <b>${impostorAtual}</b> foi descoberto.<br><br>❌ E errou o palpite! A comida era ${comidaAtual}.`;
+            let acertouPalpite = (palpite === comidaAtual);
+
+            // Se acertou, ganha +2 pontos (seja de consolação ou extras)
+            if (acertouPalpite) {
+                placar[impostorAtual] += 2;
             }
+
+            // Monta o texto final do resultado
+            let resumo = `O impostor era: <b>${impostorAtual}</b>!<br><br>`;
+
+            if (impostorFoiDescoberto) {
+                resumo += `🚨 <b>A casa caiu!</b> A maioria votou certo e o Impostor foi pego.<br><br>`;
+            } else {
+                resumo += `🎉 <b>Enganou geral!</b> O Impostor sobreviveu à votação (+2 pts).<br><br>`;
+            }
+
+            if (acertouPalpite) {
+                resumo += `🎯 <b>E ACERTOU O PALPITE!</b> A comida era ${comidaAtual}. (Ganhou +2 pts do palpite!)`;
+            } else {
+                resumo += `❌ <b>E errou o palpite!</b> A comida era ${comidaAtual}.`;
+            }
+
+            texto.innerHTML = resumo;
             mostrarTela('tela-resultado');
         }
 
