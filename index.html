@@ -40,7 +40,7 @@
         input {
             padding: 15px;
             font-size: 16px;
-            width: calc(100% - 34px); /* Ajuste de padding */
+            width: calc(100% - 34px);
             border-radius: 8px;
             border: 1px solid #333;
             margin-bottom: 10px;
@@ -108,17 +108,18 @@
 
     <div id="tela-palpite" class="tela">
         <h2>🤐 O Impostor era: <span id="nome-impostor-descoberto"></span></h2>
-        <p>Você foi descoberto! Qual era a comida secreta para ganhar 1 ponto de consolação?</p>
+        <p id="texto-instrucao-palpite"></p>
         <div id="botoes-palpite"></div>
     </div>
 
     <script>
         // --- VARIÁVEIS GLOBAIS ---
-        let jogadores = []; // Começa vazio
+        let jogadores = [];
         let placar = {};
         let historicoImpostores = [];
         let comidasUsadas = [];
         let jogoJaIniciou = false;
+        let impostorFoiDescoberto = false; // Controle novo para o palpite
         
         let comidas = ["Açaí", "Alfajor", "Arroz Doce", "Bacon", "Batata Frita", "Beijinho", "Bife à Parmegiana", "Bolo de Cenoura", "Brigadeiro", "Cachorro Quente", "Churros", "Coxinha", "Croissant", "Feijoada", "Hambúrguer", "Lasanha", "Macarrão", "Misto Quente", "Omelete", "Panqueca", "Pastel", "Pão de Queijo", "Pipoca", "Pizza", "Pudim", "Salada", "Sorvete", "Strogonoff", "Sushi", "Yakisoba"];
         let perguntas = ["Você prefere comer isso no café da manhã, almoço, janta ou na madrugada?", "É o tipo de comida que você divide ou come escondido?", "Combina mais com refri, suco natural ou cerveja?", "Qual o molho não pode faltar?", "Fica melhor no dia seguinte requentado?", "Faz muita sujeira para comer no sofá?", "Dá para comer todo dia ou enjoa?", "Você prefere a versão caseira ou comprada?", "Comeria pelo resto da vida?", "É comida de dia frio ou ensolarado?", "Qual o acompanhamento perfeito?", "É comida de fim de semana ou de correria?", "Você come triste para dar aquela melhorada no humor?", "Você costuma pedir no delivery ou sair para comer?", "Já passou mal de tanto comer isso?", "É uma comida superestimada ou merece a fama?", "É uma comida que pesa ou dá pra comer um monte?", "Como é o cheiro que deixa na casa?", "Você costuma raspar o prato/panela?"];
@@ -131,11 +132,9 @@
         let r_respondedor = [];
         let perguntasSorteadas = [];
         let votosRecebidos = {};
-        let impostorFoiDescoberto = false;
 
         // --- MENU E JOGADORES ---
         function atualizarInterfaceMenu() {
-            // Atualiza Lista de Jogadores
             const divJogadores = document.getElementById('lista-jogadores-ui');
             document.getElementById('contagem-jogadores').innerText = jogadores.length;
             divJogadores.innerHTML = '';
@@ -152,17 +151,15 @@
                 });
             }
 
-            // Atualiza Placar (só mostra se o jogo já rodou)
             if (jogoJaIniciou) {
                 document.getElementById('box-placar').style.display = 'block';
                 const divPlacar = document.getElementById('lista-placar');
                 divPlacar.innerHTML = '';
                 
-                // Cria os jogadores no placar se não existirem
                 jogadores.forEach(j => { if (!(j in placar)) placar[j] = 0; });
                 
                 let placarOrdenado = Object.keys(placar)
-                    .filter(j => jogadores.includes(j)) // Mostra apenas quem ainda está no jogo
+                    .filter(j => jogadores.includes(j))
                     .sort((a, b) => placar[b] - placar[a]);
                 
                 placarOrdenado.forEach((j, index) => {
@@ -186,7 +183,7 @@
             
             jogadores.push(nome);
             input.value = '';
-            input.focus(); // Mantém o teclado aberto para o próximo
+            input.focus();
             atualizarInterfaceMenu();
         }
 
@@ -206,7 +203,6 @@
             mostrarTela('tela-menu');
         }
 
-        // Permite adicionar jogador apertando "Enter" no teclado
         document.getElementById("novo-jogador").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -214,7 +210,6 @@
             }
         });
 
-        // Auxiliar de embaralhar
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -229,7 +224,6 @@
         function iniciarJogo() {
             if (jogadores.length < 3) { alert("Adicione pelo menos 3 jogadores para jogar!"); return; }
             
-            // Inicializa placar para novos jogadores antes da rodada
             jogadores.forEach(j => { if (!(j in placar)) placar[j] = 0; });
             
             let comidasDisponiveis = comidas.filter(c => !comidasUsadas.includes(c));
@@ -351,15 +345,13 @@
             let maxVotos = Math.max(...Object.values(votosRecebidos));
             let maisVotados = Object.keys(votosRecebidos).filter(j => votosRecebidos[j] === maxVotos);
             
-            // Verifica se o impostor escapou (não foi o mais votado OU houve empate)
             if (!maisVotados.includes(impostorAtual) || (maisVotados.length > 1 && maisVotados.includes(impostorAtual))) {
                 impostorFoiDescoberto = false;
-                placar[impostorAtual] += 2; // Ganha 2 pontos por sobreviver
+                placar[impostorAtual] += 2; 
             } else {
                 impostorFoiDescoberto = true;
             }
 
-            // O jogo SEMPRE vai para a tela de palpite agora
             prepararPalpiteComida();
         }
 
@@ -395,12 +387,10 @@
             let texto = document.getElementById('texto-resultado');
             let acertouPalpite = (palpite === comidaAtual);
 
-            // Se acertou, ganha +2 pontos (seja de consolação ou extras)
             if (acertouPalpite) {
                 placar[impostorAtual] += 2;
             }
 
-            // Monta o texto final do resultado
             let resumo = `O impostor era: <b>${impostorAtual}</b>!<br><br>`;
 
             if (impostorFoiDescoberto) {
@@ -419,7 +409,7 @@
             mostrarTela('tela-resultado');
         }
 
-        // Inicialização da Tela Vazia
+        // Inicialização
         atualizarInterfaceMenu();
     </script>
 </body>
