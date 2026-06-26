@@ -30,60 +30,69 @@
             font-size: 18px;
             width: 100%;
             cursor: pointer;
+            font-weight: bold;
         }
         button:active { background-color: #ff6b81; }
-        .btn-verde { background-color: #2ed573; }
+        .btn-verde { background-color: #2ed573; margin-top: 20px;}
         .btn-verde:active { background-color: #26b360; }
+        .btn-pequeno { padding: 5px 10px; width: auto; margin: 0; background-color: transparent; border: 1px solid #ff4757; color: #ff4757;}
         
         input {
-            padding: 10px;
+            padding: 15px;
             font-size: 16px;
-            width: calc(100% - 24px);
+            width: calc(100% - 34px); /* Ajuste de padding */
             border-radius: 8px;
+            border: 1px solid #333;
             margin-bottom: 10px;
+            background-color: #1e1e1e;
+            color: white;
         }
-        .lista-jogadores { text-align: left; background: #1e1e1e; padding: 10px; border-radius: 8px; margin-bottom: 20px; }
-        .placar-item { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 5px 0;}
+        .sessao-box { background: #1e1e1e; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left;}
+        .placar-item, .jogador-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding: 10px 0;}
+        .jogador-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
 
-    <!-- TELA 1: MENU PRINCIPAL -->
     <div id="tela-menu" class="tela ativa">
         <h1>Jogo do Impostor 🕵️‍♂️</h1>
         
-        <div class="lista-jogadores">
-            <h3>Placar Atual:</h3>
+        <div class="sessao-box">
+            <h3 style="margin-top: 0;">Novo Jogador</h3>
+            <input type="text" id="novo-jogador" placeholder="Digite o nome do jogador...">
+            <button onclick="adicionarJogador()">Confirmar</button>
+        </div>
+
+        <div class="sessao-box" id="box-jogadores">
+            <h3 style="margin-top: 0;">Jogadores na Partida (<span id="contagem-jogadores">0</span>)</h3>
+            <div id="lista-jogadores-ui"></div>
+        </div>
+
+        <div class="sessao-box" id="box-placar" style="display: none;">
+            <h3 style="margin-top: 0;">Placar Atual:</h3>
             <div id="lista-placar"></div>
         </div>
 
-        <input type="text" id="novo-jogador" placeholder="Nome do jogador">
-        <button onclick="adicionarJogador()">Adicionar Jogador</button>
-        <button onclick="removerJogador()">Remover Último</button>
         <button onclick="iniciarJogo()" class="btn-verde">Iniciar Jogo</button>
     </div>
 
-    <!-- TELA 2: PASSAR O CELULAR -->
     <div id="tela-passar" class="tela">
         <h2 id="texto-passar">Passe o celular para...</h2>
         <button onclick="revelarPapel()">Mostrar meu segredo</button>
     </div>
 
-    <!-- TELA 3: REVELAÇÃO -->
     <div id="tela-revelacao" class="tela">
         <h2 id="titulo-papel">--- SEGREDO ---</h2>
         <p id="texto-papel" style="font-size: 24px; font-weight: bold;"></p>
         <button onclick="proximoJogadorFaseRevelacao()">Entendi, esconder!</button>
     </div>
 
-    <!-- TELA 4: PERGUNTAS -->
     <div id="tela-perguntas" class="tela">
         <h2>🎙️ Hora das Perguntas</h2>
         <p id="texto-pergunta" style="font-size: 20px; background: #1e1e1e; padding: 15px; border-radius: 8px;"></p>
         <button onclick="proximaPergunta()" class="btn-verde">Próxima Pergunta</button>
     </div>
 
-    <!-- TELA 5: VOTAÇÃO -->
     <div id="tela-votacao" class="tela">
         <h2>⚖️ Votação</h2>
         <h3 id="texto-vez-votar"></h3>
@@ -91,14 +100,12 @@
         <div id="botoes-votos"></div>
     </div>
 
-    <!-- TELA 6: RESULTADO -->
     <div id="tela-resultado" class="tela">
         <h2 id="titulo-resultado">Resultado da Rodada</h2>
         <p id="texto-resultado" style="font-size: 20px;"></p>
-        <button onclick="mostrarTela('tela-menu')" class="btn-verde">Jogar Mais Uma</button>
+        <button onclick="mostrarMenuPosJogo()" class="btn-verde">Jogar Mais Uma</button>
     </div>
 
-    <!-- TELA 7: PALPITE DO IMPOSTOR -->
     <div id="tela-palpite" class="tela">
         <h2>🤐 O Impostor era: <span id="nome-impostor-descoberto"></span></h2>
         <p>Você foi descoberto! Qual era a comida secreta para ganhar 1 ponto de consolação?</p>
@@ -107,15 +114,15 @@
 
     <script>
         // --- VARIÁVEIS GLOBAIS ---
-        let jogadores = ["Bruno", "Julia", "Celina"];
+        let jogadores = []; // Começa vazio
         let placar = {};
         let historicoImpostores = [];
         let comidasUsadas = [];
+        let jogoJaIniciou = false;
         
         let comidas = ["Açaí", "Alfajor", "Arroz Doce", "Bacon", "Batata Frita", "Beijinho", "Bife à Parmegiana", "Bolo de Cenoura", "Brigadeiro", "Cachorro Quente", "Churros", "Coxinha", "Croissant", "Feijoada", "Hambúrguer", "Lasanha", "Macarrão", "Misto Quente", "Omelete", "Panqueca", "Pastel", "Pão de Queijo", "Pipoca", "Pizza", "Pudim", "Salada", "Sorvete", "Strogonoff", "Sushi", "Yakisoba"];
         let perguntas = ["Você prefere comer isso no café da manhã, almoço, janta ou na madrugada?", "É o tipo de comida que você divide ou come escondido?", "Combina mais com refri, suco natural ou cerveja?", "Qual o molho não pode faltar?", "Fica melhor no dia seguinte requentado?", "Faz muita sujeira para comer no sofá?", "Dá para comer todo dia ou enjoa?", "Você prefere a versão caseira ou comprada?", "Comeria pelo resto da vida?", "É comida de dia frio ou ensolarado?", "Qual o acompanhamento perfeito?", "É comida de fim de semana ou de correria?", "Você come triste para dar aquela melhorada no humor?", "Você costuma pedir no delivery ou sair para comer?", "Já passou mal de tanto comer isso?", "É uma comida superestimada ou merece a fama?", "É uma comida que pesa ou dá pra comer um monte?", "Como é o cheiro que deixa na casa?", "Você costuma raspar o prato/panela?"];
         
-        // Controles de estado
         let impostorAtual = "";
         let comidaAtual = "";
         let indiceJogadorAtual = 0;
@@ -125,47 +132,88 @@
         let perguntasSorteadas = [];
         let votosRecebidos = {};
 
-        // Inicia placar e interface
-        function atualizarMenu() {
-            const divPlacar = document.getElementById('lista-placar');
-            divPlacar.innerHTML = '';
+        // --- MENU E JOGADORES ---
+        function atualizarInterfaceMenu() {
+            // Atualiza Lista de Jogadores
+            const divJogadores = document.getElementById('lista-jogadores-ui');
+            document.getElementById('contagem-jogadores').innerText = jogadores.length;
+            divJogadores.innerHTML = '';
             
-            // Cria os jogadores no placar se não existirem
-            jogadores.forEach(j => { if (!(j in placar)) placar[j] = 0; });
-            
-            // Ordena o placar por pontos
-            let placarOrdenado = Object.keys(placar).sort((a, b) => placar[b] - placar[a]);
-            
-            placarOrdenado.forEach((j, index) => {
-                divPlacar.innerHTML += `<div class="placar-item"><span>${index + 1}º | ${j}</span> <span>${placar[j]} pts</span></div>`;
-            });
+            if(jogadores.length === 0) {
+                divJogadores.innerHTML = '<p style="color: #888; font-size: 14px; text-align: center;">Nenhum jogador adicionado ainda.</p>';
+            } else {
+                jogadores.forEach((j, index) => {
+                    divJogadores.innerHTML += `
+                        <div class="jogador-item">
+                            <span>👤 ${j}</span>
+                            <button class="btn-pequeno" onclick="removerJogador(${index})">X</button>
+                        </div>`;
+                });
+            }
+
+            // Atualiza Placar (só mostra se o jogo já rodou)
+            if (jogoJaIniciou) {
+                document.getElementById('box-placar').style.display = 'block';
+                const divPlacar = document.getElementById('lista-placar');
+                divPlacar.innerHTML = '';
+                
+                // Cria os jogadores no placar se não existirem
+                jogadores.forEach(j => { if (!(j in placar)) placar[j] = 0; });
+                
+                let placarOrdenado = Object.keys(placar)
+                    .filter(j => jogadores.includes(j)) // Mostra apenas quem ainda está no jogo
+                    .sort((a, b) => placar[b] - placar[a]);
+                
+                placarOrdenado.forEach((j, index) => {
+                    divPlacar.innerHTML += `<div class="placar-item"><span>${index + 1}º | ${j}</span> <strong>${placar[j]} pts</strong></div>`;
+                });
+            }
         }
 
         function adicionarJogador() {
             const input = document.getElementById('novo-jogador');
             const nome = input.value.trim();
-            if (nome && !jogadores.includes(nome)) {
-                jogadores.push(nome);
-                input.value = '';
-                atualizarMenu();
-            } else { alert("Nome inválido ou já existe!"); }
+            
+            if (!nome) {
+                alert("Digite um nome primeiro!");
+                return;
+            }
+            if (jogadores.includes(nome)) {
+                alert("Este nome já está na lista!");
+                return;
+            }
+            
+            jogadores.push(nome);
+            input.value = '';
+            input.focus(); // Mantém o teclado aberto para o próximo
+            atualizarInterfaceMenu();
         }
 
-        function removerJogador() {
-            if(jogadores.length > 0) {
-                let removido = jogadores.pop();
-                delete placar[removido];
-                atualizarMenu();
-            }
+        function removerJogador(index) {
+            jogadores.splice(index, 1);
+            atualizarInterfaceMenu();
         }
 
         function mostrarTela(idTela) {
             document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
             document.getElementById(idTela).classList.add('ativa');
-            if (idTela === 'tela-menu') atualizarMenu();
         }
 
-        // Embaralha um array (Função auxiliar)
+        function mostrarMenuPosJogo() {
+            jogoJaIniciou = true;
+            atualizarInterfaceMenu();
+            mostrarTela('tela-menu');
+        }
+
+        // Permite adicionar jogador apertando "Enter" no teclado
+        document.getElementById("novo-jogador").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                adicionarJogador();
+            }
+        });
+
+        // Auxiliar de embaralhar
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -176,9 +224,12 @@
             return array;
         }
 
-        // --- FASE 1: INÍCIO E SORTEIO ---
+        // --- LÓGICA DO JOGO ---
         function iniciarJogo() {
-            if (jogadores.length < 3) { alert("Mínimo de 3 jogadores!"); return; }
+            if (jogadores.length < 3) { alert("Adicione pelo menos 3 jogadores para jogar!"); return; }
+            
+            // Inicializa placar para novos jogadores antes da rodada
+            jogadores.forEach(j => { if (!(j in placar)) placar[j] = 0; });
             
             let comidasDisponiveis = comidas.filter(c => !comidasUsadas.includes(c));
             if (comidasDisponiveis.length === 0) { alert("Acabaram as comidas!"); return; }
@@ -186,7 +237,6 @@
             comidaAtual = comidasDisponiveis[Math.floor(Math.random() * comidasDisponiveis.length)];
             comidasUsadas.push(comidaAtual);
             
-            // Sorteia impostor com trava de 2 vezes
             let candidatos = [...jogadores];
             if (historicoImpostores.length >= 2) {
                 let ultimo = historicoImpostores[historicoImpostores.length - 1];
@@ -198,7 +248,6 @@
             impostorAtual = candidatos[Math.floor(Math.random() * candidatos.length)];
             historicoImpostores.push(impostorAtual);
 
-            // Prepara a votação zerada
             votosRecebidos = {};
             jogadores.forEach(j => votosRecebidos[j] = 0);
 
@@ -206,13 +255,12 @@
             prepararPassarCelular();
         }
 
-        // --- FASE 2: REVELAÇÃO ---
         function prepararPassarCelular() {
             if (indiceJogadorAtual < jogadores.length) {
                 document.getElementById('texto-passar').innerText = `Vez de: ${jogadores[indiceJogadorAtual]}\n\n(Esconda o celular dos outros)`;
                 mostrarTela('tela-passar');
             } else {
-                iniciarPerguntas(); // Vai para as perguntas!
+                iniciarPerguntas();
             }
         }
 
@@ -235,9 +283,7 @@
             prepararPassarCelular();
         }
 
-        // --- FASE 3: PERGUNTAS ---
         function iniciarPerguntas() {
-            // Sorteia a ordem de perguntas (ex: A pergunta pro B, B pro C, C pro A)
             p_perguntador = shuffle([...jogadores]);
             r_respondedor = p_perguntador.slice(1).concat(p_perguntador[0]);
             perguntasSorteadas = shuffle([...perguntas]).slice(0, jogadores.length);
@@ -264,7 +310,6 @@
             mostrarProximaPergunta();
         }
 
-        // --- FASE 4: VOTAÇÃO ---
         function iniciarVotacao() {
             indiceJogadorAtual = 0;
             prepararVoto();
@@ -278,7 +323,6 @@
                 let divBotoes = document.getElementById('botoes-votos');
                 divBotoes.innerHTML = '';
                 
-                // Gera botões apenas para os OUTROS jogadores
                 jogadores.forEach(alvo => {
                     if (alvo !== jogadorVotando) {
                         let btn = document.createElement('button');
@@ -296,13 +340,12 @@
         function registrarVoto(quemVotou, alvo) {
             votosRecebidos[alvo]++;
             if (alvo === impostorAtual && quemVotou !== impostorAtual) {
-                placar[quemVotou] += 1; // Cidadão acertou, ganha 1 ponto
+                placar[quemVotou] += 1;
             }
             indiceJogadorAtual++;
             prepararVoto();
         }
 
-        // --- FASE 5: RESULTADOS ---
         function calcularResultado() {
             let maxVotos = Math.max(...Object.values(votosRecebidos));
             let maisVotados = Object.keys(votosRecebidos).filter(j => votosRecebidos[j] === maxVotos);
@@ -321,7 +364,6 @@
                 mostrarTela('tela-resultado');
             } 
             else {
-                // Impostor descoberto! Vai para o palpite.
                 prepararPalpiteComida();
             }
         }
@@ -329,7 +371,6 @@
         function prepararPalpiteComida() {
             document.getElementById('nome-impostor-descoberto').innerText = impostorAtual;
             
-            // Gera 4 opções aleatórias + a certa
             let outrasComidas = comidas.filter(c => c !== comidaAtual);
             let opcoes = shuffle(outrasComidas).slice(0, 4);
             opcoes.push(comidaAtual);
@@ -359,8 +400,8 @@
             mostrarTela('tela-resultado');
         }
 
-        // Inicializa a tela com o menu montado
-        atualizarMenu();
+        // Inicialização da Tela Vazia
+        atualizarInterfaceMenu();
     </script>
 </body>
 </html>
