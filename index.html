@@ -350,7 +350,15 @@
                 document.getElementById('texto-papel').innerText = "🚨 VOCÊ É O FALSO CAIPIRA (IMPOSTOR)! 🚨";
                 document.getElementById('texto-papel').style.color = "#ff5252";
             } else {
-                document.getElementById('texto-papel').innerText = `✅ VOCÊ É DA ROÇA!\n\nA Comida é:\n${comidaAtual}\n\nObervação: Estamos do mesmo lado Rapha!`;
+                // Monta a base da mensagem
+                let mensagem = `✅ VOCÊ É DA ROÇA!\n\nA Comida é:\n${comidaAtual}`;
+                
+                // Verifica se é a primeira rodada (partidasJogadas está em 0)
+                if (partidasJogadas === 0) {
+                    mensagem += "\n\nObservação: Estamos do mesmo lado Rapha!";
+                }
+                
+                document.getElementById('texto-papel').innerText = mensagem;
                 document.getElementById('texto-papel').style.color = "#69f0ae";
             }
             mostrarTela('tela-revelacao');
