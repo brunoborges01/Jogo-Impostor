@@ -166,12 +166,12 @@
         let comidasUsadas = [];
         let jogoJaIniciou = false;
         let impostorFoiDescoberto = false; 
-        let jogadoresMaisVotados = []; // <-- NOVA VARIÁVEL AQUI
+        let jogadoresMaisVotados = []; 
+        let limitePartidas = 0; 
+        let partidasJogadas = 0;
         
-        // Comidas atualizadas para o tema Festa Junina!
-        let comidas = ["Pamonha", "Canjica", "Maçã do Amor", "Milho Cozido", "Cachorro Quente", "Paçoca", "Pé de Moleque", "Quentão", "Bolo de Fubá", "Curau", "Amendoim Doce", "Pipoca", "Caldo Verde", "Arroz Doce", "Espetinho", "Cocada", "Pinhão", "Cuscuz", "Vinho Quente", "Bolo de Milho"];
-        
-        let perguntas = ["Você prefere comer isso no começo ou no final da festa?", "É o tipo de comida que suja a mão inteira?", "Combina mais com quentão, refri ou cerveja?", "É muito doce, salgado ou meio a meio?", "Fica melhor no dia seguinte requentado?", "Dá pra comer andando pela festa ou precisa sentar?", "Você costuma repetir essa comida no arraiá?", "Tem gosto de infância para você?", "Comeria isso o ano inteiro ou só em junho/julho?", "É comida que esquenta no frio ou tanto faz?", "Você prefere a versão caseira ou a da barraquinha?", "Dá pra dividir com o compadre/comadre ou come sozinho?", "Vende rápido ou sempre sobra na festa?", "Dá azia se comer demais?", "Qual é a melhor cobertura ou acompanhamento pra isso?", "É caro na quermesse ou baratinho?", "Tem que mastigar muito ou derrete na boca?", "Qual é o cheiro que isso tem quando tá no fogo?", "Criança costuma gostar disso?"];
+        let comidas = ["Açaí", "Alfajor", "Arroz Doce", "Bacon", "Batata Frita", "Beijinho", "Bife à Parmegiana", "Bolo de Cenoura", "Brigadeiro", "Cachorro Quente", "Churros", "Coxinha", "Croissant", "Feijoada", "Hambúrguer", "Lasanha", "Macarrão", "Misto Quente", "Omelete", "Panqueca", "Pastel", "Pão de Queijo", "Pipoca", "Pizza", "Pudim", "Salada", "Sorvete", "Strogonoff", "Sushi", "Yakisoba"];
+        let perguntas = ["Você prefere comer isso no café da manhã, almoço, janta ou na madrugada?", "É o tipo de comida que você divide ou come escondido?", "Combina mais com refri, suco natural ou cerveja?", "Qual o molho não pode faltar?", "Fica melhor no dia seguinte requentado?", "Faz muita sujeira para comer no sofá?", "Dá para comer todo dia ou enjoa?", "Você prefere a versão caseira ou comprada?", "Comeria pelo resto da vida?", "É comida de dia frio ou ensolarado?", "Qual o acompanhamento perfeito?", "É comida de fim de semana ou de correria?", "Você come triste para dar aquela melhorada no humor?", "Você costuma pedir no delivery ou sair para comer?", "Já passou mal de tanto comer isso?", "É uma comida superestimada ou merece a fama?", "É uma comida que pesa ou dá pra comer um monte?", "Como é o cheiro que deixa na casa?", "Você costuma raspar o prato/panela?"];
         
         let impostorAtual = "";
         let comidaAtual = "";
@@ -201,7 +201,6 @@
             } else {
                 jogadores.forEach((j, index) => {
                     let botaoRemover = jogoJaIniciou ? '' : `<button class="btn-pequeno" onclick="removerJogador(${index})">X</button>`;
-                    
                     divJogadores.innerHTML += `
                         <div class="jogador-item">
                             <span>👒 ${j}</span>
@@ -216,7 +215,6 @@
                 divPlacar.innerHTML = '';
                 
                 jogadores.forEach(j => { if (!(j in placar)) placar[j] = 0; });
-                
                 let placarOrdenado = Object.keys(placar)
                     .filter(j => jogadores.includes(j))
                     .sort((a, b) => placar[b] - placar[a]);
@@ -224,6 +222,18 @@
                 placarOrdenado.forEach((j, index) => {
                     divPlacar.innerHTML += `<div class="placar-item"><span>${index + 1}º | ${j}</span> <strong>${placar[j]} pts</strong></div>`;
                 });
+
+                // Lógica do botão informativo
+                const btnIniciar = document.querySelector('.btn-verde');
+                if (partidasJogadas >= limitePartidas && limitePartidas > 0) {
+                    btnIniciar.innerText = "Arraiá Encerrado! 🔥";
+                    btnIniciar.style.backgroundColor = "#5d4037";
+                    btnIniciar.disabled = true;
+                } else {
+                    btnIniciar.innerText = "Puxar a Quadrilha (Iniciar)";
+                    btnIniciar.style.backgroundColor = "#2e7d32";
+                    btnIniciar.disabled = false;
+                }
             }
         }
 
@@ -281,12 +291,26 @@
 
         // --- LÓGICA DO JOGO ---
         function iniciarJogo() {
-            if (jogadores.length < 3) { alert("Chama pelo menos 3 compadres pra jogar!"); return; }
-            
+            if (jogadores.length < 3) { 
+                alert("Chama pelo menos 3 compadres pra jogar!"); 
+                return; 
+            }
+
+            if (partidasJogadas === 0) {
+                limitePartidas = jogadores.length;
+            }
+
+            if (partidasJogadas >= limitePartidas) {
+                return; 
+            }
+
             jogadores.forEach(j => { if (!(j in placar)) placar[j] = 0; });
             
             let comidasDisponiveis = comidas.filter(c => !comidasUsadas.includes(c));
-            if (comidasDisponiveis.length === 0) { alert("Vixe, a barraquinha zerou as comidas!"); return; }
+            if (comidasDisponiveis.length === 0) { 
+                alert("Vixe, a barraquinha zerou as comidas!"); 
+                return; 
+            }
             
             comidaAtual = comidasDisponiveis[Math.floor(Math.random() * comidasDisponiveis.length)];
             comidasUsadas.push(comidaAtual);
@@ -326,7 +350,7 @@
                 document.getElementById('texto-papel').innerText = "🚨 VOCÊ É O FALSO CAIPIRA (IMPOSTOR)! 🚨";
                 document.getElementById('texto-papel').style.color = "#ff5252";
             } else {
-                document.getElementById('texto-papel').innerText = `✅ VOCÊ É DA ROÇA!\n\nA Comida é:\n🌽 ${comidaAtual} 🌽`;
+                document.getElementById('texto-papel').innerText = `✅ VOCÊ É DA ROÇA!\n\nA Comida é:\n${comidaAtual}\n\nObervação: Estamos do mesmo lado Rapha!`;
                 document.getElementById('texto-papel').style.color = "#69f0ae";
             }
             mostrarTela('tela-revelacao');
@@ -445,57 +469,38 @@
         }
 
         function verificarPalpite(palpite) {
-            let texto = document.getElementById('texto-resultado');
-            let acertouPalpite = (palpite === comidaAtual);
+    let texto = document.getElementById('texto-resultado');
+    let acertouPalpite = (palpite === comidaAtual);
 
-            // Pega a quantidade máxima de votos do empate
-            let maxVotos = votosRecebidos[jogadoresMaisVotados[0]];
+    let maxVotos = votosRecebidos[jogadoresMaisVotados[0]];
 
-            if (acertouPalpite) {
-                placar[impostorAtual] += 2;
-            }
+    if (acertouPalpite) {
+        placar[impostorAtual] += 2;
+    }
 
-            let resumo = `O Falso Caipira era: <b>${impostorAtual}</b>!<br><br>`;
+    // Incrementa o contador de partidas
+    partidasJogadas++;
 
-            if (impostorFoiDescoberto) {
-                resumo += `🚨 <b>A casa caiu sô!</b> A maioria votou certo e o Impostor foi pego no flagra.<br><br>`;
-            } else {
-                if (jogadoresMaisVotados.length > 1) {
-                    
-                    // --- AQUI ESTÁ A MÁGICA DAS VÍRGULAS ---
-                    // Pega todos os nomes, separa por vírgula, e coloca o "e" apenas no último
-                    let nomesEmpatados = jogadoresMaisVotados.slice(0, -1).join(', ') + ' e ' + jogadoresMaisVotados[jogadoresMaisVotados.length - 1];
-                    
-                    resumo += `⚖️ <b>Deu empate na roça!</b><br>Os mais votados foram: <b>${nomesEmpatados}</b> (com ${maxVotos} votos cada).<br>Como o povo não se decidiu, o Impostor saiu de fininho (+2 pts).<br><br>`;
-                } else {
-                    resumo += `🎉 <b>Enganou geral!</b><br>O mais votado (coitado) foi <b>${jogadoresMaisVotados[0]}</b>. O Impostor saiu ileso (+2 pts).<br><br>`;
-                }
-            }
+    let resumo = `O Falso Caipira era: <b>${impostorAtual}</b>!<br><br>`;
 
-            if (acertouPalpite) {
-                resumo += `🎯 <b>E ACERTOU O PALPITE!</b> A comida era ${comidaAtual}. (Ganhou +2 pts do palpite!)`;
-            } else {
-                resumo += `❌ <b>E errou o palpite!</b> A comida era ${comidaAtual}.`;
-            }
-
-            // --- AQUI ESTÁ O PAINEL DE FOFOCA (Quem tomou voto) ---
-            resumo += `<br><br><hr style="border-top: 1px dashed #ffb300; margin: 15px 0;">`;
-            resumo += `<div style="font-size: 16px; text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">`;
-            resumo += `<b>🗳️ Quantidade de Votos:</b><br>`;
-            
-            // Ordena para mostrar quem tomou mais votos no topo
-            let votosOrdenados = Object.keys(votosRecebidos).sort((a, b) => votosRecebidos[b] - votosRecebidos[a]);
-            
-            votosOrdenados.forEach(j => {
-                if (votosRecebidos[j] > 0) {
-                    resumo += `• ${j}: ${votosRecebidos[j]} voto(s)<br>`;
-                }
-            });
-            resumo += `</div>`;
-
-            texto.innerHTML = resumo;
-            mostrarTela('tela-resultado');
+    if (impostorFoiDescoberto) {
+        resumo += `🚨 <b>A casa caiu sô!</b> A maioria votou certo e o Impostor foi pego no flagra.<br><br>`;
+    } else {
+        if (jogadoresMaisVotados.length > 1) {
+            let nomesEmpatados = jogadoresMaisVotados.join(', ');
+            resumo += `⚖️ <b>Deu empate na roça!</b><br>Os mais votados foram: <b>${nomesEmpatados}</b>.<br><br>`;
+        } else {
+            resumo += `🎉 <b>Enganou geral!</b><br>O mais votado foi <b>${jogadoresMaisVotados[0]}</b>.<br><br>`;
         }
+    }
+
+    resumo += acertouPalpite ? `🎯 <b>Acertou o palpite!</b>` : `❌ <b>Errou o palpite!</b>`;
+    resumo += `<br><br><b>Rodada ${partidasJogadas} de ${limitePartidas}</b>`;
+
+    
+    texto.innerHTML = resumo;
+    mostrarTela('tela-resultado');
+}
 
         // Inicialização
         atualizarInterfaceMenu();
