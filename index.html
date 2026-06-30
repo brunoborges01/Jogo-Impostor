@@ -166,6 +166,7 @@
         let comidasUsadas = [];
         let jogoJaIniciou = false;
         let impostorFoiDescoberto = false; 
+        let jogadoresMaisVotados = []; // <-- NOVA VARIÁVEL AQUI
         
         // Comidas atualizadas para o tema Festa Junina!
         let comidas = ["Pamonha", "Canjica", "Maçã do Amor", "Milho Cozido", "Cachorro Quente", "Paçoca", "Pé de Moleque", "Quentão", "Bolo de Fubá", "Curau", "Amendoim Doce", "Pipoca", "Caldo Verde", "Arroz Doce", "Espetinho", "Cocada", "Pinhão", "Cuscuz", "Vinho Quente", "Bolo de Milho"];
@@ -189,7 +190,6 @@
             document.getElementById('contagem-jogadores').innerText = jogadores.length;
             divJogadores.innerHTML = '';
             
-            // Esconde a caixa de adicionar jogador se o jogo já iniciou
             if (jogoJaIniciou) {
                 boxNovoJogador.style.display = 'none';
             } else {
@@ -200,7 +200,6 @@
                 divJogadores.innerHTML = '<p style="color: #bcaaa4; font-size: 14px; text-align: center;">Nenhum compadre na roda ainda.</p>';
             } else {
                 jogadores.forEach((j, index) => {
-                    // Só cria o botão "X" de remover se o jogo AINDA NÃO iniciou
                     let botaoRemover = jogoJaIniciou ? '' : `<button class="btn-pequeno" onclick="removerJogador(${index})">X</button>`;
                     
                     divJogadores.innerHTML += `
@@ -401,11 +400,13 @@
             prepararVoto();
         }
 
+        // --- LÓGICA DE RESULTADO ATUALIZADA AQUI ---
         function calcularResultado() {
             let maxVotos = Math.max(...Object.values(votosRecebidos));
-            let maisVotados = Object.keys(votosRecebidos).filter(j => votosRecebidos[j] === maxVotos);
+            // Guarda na variável global todos que empataram com o máximo de votos
+            jogadoresMaisVotados = Object.keys(votosRecebidos).filter(j => votosRecebidos[j] === maxVotos); 
             
-            if (!maisVotados.includes(impostorAtual) || (maisVotados.length > 1 && maisVotados.includes(impostorAtual))) {
+            if (!jogadoresMaisVotados.includes(impostorAtual) || (jogadoresMaisVotados.length > 1 && jogadoresMaisVotados.includes(impostorAtual))) {
                 impostorFoiDescoberto = false;
                 placar[impostorAtual] += 2; 
             } else {
@@ -453,10 +454,15 @@
 
             let resumo = `O Falso Caipira era: <b>${impostorAtual}</b>!<br><br>`;
 
+            // MUDANÇA: Exibe os alvos da votação baseada no empate ou voto errado
             if (impostorFoiDescoberto) {
                 resumo += `🚨 <b>A casa caiu sô!</b> A maioria votou certo e o Impostor foi pego no flagra.<br><br>`;
             } else {
-                resumo += `🎉 <b>Enganou geral!</b> O Impostor saiu de fininho da fogueira (+2 pts).<br><br>`;
+                if (jogadoresMaisVotados.length > 1) {
+                    resumo += `⚖️ <b>Deu empate na roça!</b> Os mais votados foram: <b>${jogadoresMaisVotados.join(' e ')}</b>.<br>Como o povo não se decidiu, o Impostor saiu de fininho (+2 pts).<br><br>`;
+                } else {
+                    resumo += `🎉 <b>Enganou geral!</b> O mais votado (coitado) foi <b>${jogadoresMaisVotados[0]}</b>. O Impostor saiu ileso (+2 pts).<br><br>`;
+                }
             }
 
             if (acertouPalpite) {

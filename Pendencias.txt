@@ -1,6 +1,4 @@
 sistema de empate
-adicionar após primeira partida
-cores de festa junina
 maximo quantidade de jogadores
 
 registrar placar no banco de dados, e opção para deletar o banco
