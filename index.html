@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo do Impostor</title>
+    <title>Jogo do Impostor - Arraiá</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
+            /* Fundo rústico escuro com textura que lembra um xadrez bem sutil */
+            background-color: #2b1b11; 
+            background-image: repeating-linear-gradient(45deg, rgba(255, 153, 0, 0.03) 25%, transparent 25%, transparent 75%, rgba(255, 153, 0, 0.03) 75%, rgba(255, 153, 0, 0.03)), 
+                              repeating-linear-gradient(-45deg, rgba(255, 153, 0, 0.03) 25%, transparent 25%, transparent 75%, rgba(255, 153, 0, 0.03) 75%, rgba(255, 153, 0, 0.03));
+            background-size: 40px 40px;
+            color: #fff3e0; /* Cor de palha clara */
             margin: 0;
             padding: 20px;
             display: flex;
@@ -16,14 +20,17 @@
             align-items: center;
             text-align: center;
         }
-        h1, h2, h3 { color: #ff4757; }
+        h1, h2, h3 { 
+            color: #ffb300; /* Amarelo milho */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6); 
+        }
         .tela { display: none; width: 100%; max-width: 400px; }
         .tela.ativa { display: block; }
         
         button {
-            background-color: #ff4757;
-            color: white;
-            border: none;
+            background-color: #d84315; /* Laranja/Vermelho tijolo */
+            color: #fff;
+            border: 2px dashed #ffb300; /* Borda estilo "remendo" */
             padding: 15px 20px;
             margin: 8px 0;
             border-radius: 8px;
@@ -31,83 +38,122 @@
             width: 100%;
             cursor: pointer;
             font-weight: bold;
+            box-shadow: 3px 3px 0px #870000;
+            transition: all 0.1s;
         }
-        button:active { background-color: #ff6b81; }
-        .btn-verde { background-color: #2ed573; margin-top: 20px;}
-        .btn-verde:active { background-color: #26b360; }
-        .btn-pequeno { padding: 5px 10px; width: auto; margin: 0; background-color: transparent; border: 1px solid #ff4757; color: #ff4757;}
+        button:active { 
+            background-color: #bf360c; 
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #870000;
+        }
+        .btn-verde { 
+            background-color: #2e7d32; 
+            border-color: #aeea00; 
+            box-shadow: 3px 3px 0px #1b5e20;
+            margin-top: 20px;
+        }
+        .btn-verde:active { 
+            background-color: #1b5e20; 
+            box-shadow: 1px 1px 0px #1b5e20;
+        }
+        .btn-pequeno { 
+            padding: 5px 10px; 
+            width: auto; 
+            margin: 0; 
+            background-color: transparent; 
+            border: 1px dashed #ffb300; 
+            color: #ffb300;
+            box-shadow: none;
+        }
+        .btn-pequeno:active { transform: scale(0.95); box-shadow: none;}
         
         input {
             padding: 15px;
             font-size: 16px;
             width: calc(100% - 34px);
             border-radius: 8px;
-            border: 1px solid #333;
+            border: 2px dashed #ffb300; /* Remendo */
             margin-bottom: 10px;
-            background-color: #1e1e1e;
-            color: white;
+            background-color: #4e342e; /* Marrom escuro */
+            color: #fff3e0;
         }
-        .sessao-box { background: #1e1e1e; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left;}
-        .placar-item, .jogador-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding: 10px 0;}
+        input::placeholder { color: #bcaaa4; }
+        
+        .sessao-box { 
+            background: rgba(62, 39, 35, 0.95); /* Fundo amadeirado */
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            text-align: left;
+            border: 2px solid #8d6e63;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .placar-item, .jogador-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px dashed #8d6e63; 
+            padding: 10px 0;
+        }
         .jogador-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
 
     <div id="tela-menu" class="tela ativa">
-        <h1>Jogo do Impostor 🕵️‍♂️</h1>
+        <h1>Arraiá do Impostor 🌽🕵️‍♂️</h1>
         
         <div class="sessao-box">
-            <h3 style="margin-top: 0;">Novo Jogador</h3>
-            <input type="text" id="novo-jogador" placeholder="Digite o nome do jogador...">
+            <h3 style="margin-top: 0;">Novo Caipira</h3>
+            <input type="text" id="novo-jogador" placeholder="Digite o nome do compadre...">
             <button onclick="adicionarJogador()">Confirmar</button>
         </div>
 
         <div class="sessao-box" id="box-jogadores">
-            <h3 style="margin-top: 0;">Jogadores na Partida (<span id="contagem-jogadores">0</span>)</h3>
+            <h3 style="margin-top: 0;">Gente na Roda (<span id="contagem-jogadores">0</span>)</h3>
             <div id="lista-jogadores-ui"></div>
         </div>
 
         <div class="sessao-box" id="box-placar" style="display: none;">
-            <h3 style="margin-top: 0;">Placar Atual:</h3>
+            <h3 style="margin-top: 0;">Placar do Arraiá:</h3>
             <div id="lista-placar"></div>
         </div>
 
-        <button onclick="iniciarJogo()" class="btn-verde">Iniciar Jogo</button>
+        <button onclick="iniciarJogo()" class="btn-verde">Puxar a Quadrilha (Iniciar)</button>
     </div>
 
     <div id="tela-passar" class="tela">
         <h2 id="texto-passar">Passe o celular para...</h2>
-        <button onclick="revelarPapel()">Mostrar meu segredo</button>
+        <button onclick="revelarPapel()">Espiar meu segredo 👀</button>
     </div>
 
     <div id="tela-revelacao" class="tela">
         <h2 id="titulo-papel">--- SEGREDO ---</h2>
         <p id="texto-papel" style="font-size: 24px; font-weight: bold;"></p>
-        <button onclick="proximoJogadorFaseRevelacao()">Entendi, esconder!</button>
+        <button onclick="proximoJogadorFaseRevelacao()">Entendi, esconder! 🤫</button>
     </div>
 
     <div id="tela-perguntas" class="tela">
-        <h2>🎙️ Hora das Perguntas</h2>
-        <p id="texto-pergunta" style="font-size: 20px; background: #1e1e1e; padding: 15px; border-radius: 8px;"></p>
+        <h2>🎙️ Hora da Prosa</h2>
+        <p id="texto-pergunta" style="font-size: 20px; background: rgba(62, 39, 35, 0.9); padding: 15px; border-radius: 8px; border: 1px dashed #ffb300;"></p>
         <button onclick="proximaPergunta()" class="btn-verde">Próxima Pergunta</button>
     </div>
 
     <div id="tela-votacao" class="tela">
-        <h2>⚖️ Votação</h2>
+        <h2>⚖️ Correio Elegante (Votação)</h2>
         <h3 id="texto-vez-votar"></h3>
-        <p>Quem é o impostor?</p>
+        <p>Quem é o Falso Caipira (Impostor)?</p>
         <div id="botoes-votos"></div>
     </div>
 
     <div id="tela-resultado" class="tela">
-        <h2 id="titulo-resultado">Resultado da Rodada</h2>
+        <h2 id="titulo-resultado">Fim da Rodada 🔥</h2>
         <p id="texto-resultado" style="font-size: 20px;"></p>
-        <button onclick="mostrarMenuPosJogo()" class="btn-verde">Jogar Mais Uma</button>
+        <button onclick="mostrarMenuPosJogo()" class="btn-verde">Jogar Mais Uma 🪗</button>
     </div>
 
     <div id="tela-palpite" class="tela">
-        <h2>🤐 O Impostor era: <span id="nome-impostor-descoberto"></span></h2>
+        <h2>🤐 O Falso Caipira era: <span id="nome-impostor-descoberto"></span></h2>
         <p id="texto-instrucao-palpite"></p>
         <div id="botoes-palpite"></div>
     </div>
@@ -119,10 +165,12 @@
         let historicoImpostores = [];
         let comidasUsadas = [];
         let jogoJaIniciou = false;
-        let impostorFoiDescoberto = false; // Controle novo para o palpite
+        let impostorFoiDescoberto = false; 
         
-        let comidas = ["Açaí", "Alfajor", "Arroz Doce", "Bacon", "Batata Frita", "Beijinho", "Bife à Parmegiana", "Bolo de Cenoura", "Brigadeiro", "Cachorro Quente", "Churros", "Coxinha", "Croissant", "Feijoada", "Hambúrguer", "Lasanha", "Macarrão", "Misto Quente", "Omelete", "Panqueca", "Pastel", "Pão de Queijo", "Pipoca", "Pizza", "Pudim", "Salada", "Sorvete", "Strogonoff", "Sushi", "Yakisoba"];
-        let perguntas = ["Você prefere comer isso no café da manhã, almoço, janta ou na madrugada?", "É o tipo de comida que você divide ou come escondido?", "Combina mais com refri, suco natural ou cerveja?", "Qual o molho não pode faltar?", "Fica melhor no dia seguinte requentado?", "Faz muita sujeira para comer no sofá?", "Dá para comer todo dia ou enjoa?", "Você prefere a versão caseira ou comprada?", "Comeria pelo resto da vida?", "É comida de dia frio ou ensolarado?", "Qual o acompanhamento perfeito?", "É comida de fim de semana ou de correria?", "Você come triste para dar aquela melhorada no humor?", "Você costuma pedir no delivery ou sair para comer?", "Já passou mal de tanto comer isso?", "É uma comida superestimada ou merece a fama?", "É uma comida que pesa ou dá pra comer um monte?", "Como é o cheiro que deixa na casa?", "Você costuma raspar o prato/panela?"];
+        // Comidas atualizadas para o tema Festa Junina!
+        let comidas = ["Pamonha", "Canjica", "Maçã do Amor", "Milho Cozido", "Cachorro Quente", "Paçoca", "Pé de Moleque", "Quentão", "Bolo de Fubá", "Curau", "Amendoim Doce", "Pipoca", "Caldo Verde", "Arroz Doce", "Espetinho", "Cocada", "Pinhão", "Cuscuz", "Vinho Quente", "Bolo de Milho"];
+        
+        let perguntas = ["Você prefere comer isso no começo ou no final da festa?", "É o tipo de comida que suja a mão inteira?", "Combina mais com quentão, refri ou cerveja?", "É muito doce, salgado ou meio a meio?", "Fica melhor no dia seguinte requentado?", "Dá pra comer andando pela festa ou precisa sentar?", "Você costuma repetir essa comida no arraiá?", "Tem gosto de infância para você?", "Comeria isso o ano inteiro ou só em junho/julho?", "É comida que esquenta no frio ou tanto faz?", "Você prefere a versão caseira ou a da barraquinha?", "Dá pra dividir com o compadre/comadre ou come sozinho?", "Vende rápido ou sempre sobra na festa?", "Dá azia se comer demais?", "Qual é a melhor cobertura ou acompanhamento pra isso?", "É caro na quermesse ou baratinho?", "Tem que mastigar muito ou derrete na boca?", "Qual é o cheiro que isso tem quando tá no fogo?", "Criança costuma gostar disso?"];
         
         let impostorAtual = "";
         let comidaAtual = "";
@@ -140,12 +188,12 @@
             divJogadores.innerHTML = '';
             
             if(jogadores.length === 0) {
-                divJogadores.innerHTML = '<p style="color: #888; font-size: 14px; text-align: center;">Nenhum jogador adicionado ainda.</p>';
+                divJogadores.innerHTML = '<p style="color: #bcaaa4; font-size: 14px; text-align: center;">Nenhum compadre na roda ainda.</p>';
             } else {
                 jogadores.forEach((j, index) => {
                     divJogadores.innerHTML += `
                         <div class="jogador-item">
-                            <span>👤 ${j}</span>
+                            <span>👒 ${j}</span>
                             <button class="btn-pequeno" onclick="removerJogador(${index})">X</button>
                         </div>`;
                 });
@@ -173,11 +221,11 @@
             const nome = input.value.trim();
             
             if (!nome) {
-                alert("Digite um nome primeiro!");
+                alert("Oxe! Digite um nome primeiro sô!");
                 return;
             }
             if (jogadores.includes(nome)) {
-                alert("Este nome já está na lista!");
+                alert("Esse compadre já tá na lista!");
                 return;
             }
             
@@ -222,12 +270,12 @@
 
         // --- LÓGICA DO JOGO ---
         function iniciarJogo() {
-            if (jogadores.length < 3) { alert("Adicione pelo menos 3 jogadores para jogar!"); return; }
+            if (jogadores.length < 3) { alert("Chama pelo menos 3 compadres pra jogar!"); return; }
             
             jogadores.forEach(j => { if (!(j in placar)) placar[j] = 0; });
             
             let comidasDisponiveis = comidas.filter(c => !comidasUsadas.includes(c));
-            if (comidasDisponiveis.length === 0) { alert("Acabaram as comidas!"); return; }
+            if (comidasDisponiveis.length === 0) { alert("Vixe, a barraquinha zerou as comidas!"); return; }
             
             comidaAtual = comidasDisponiveis[Math.floor(Math.random() * comidasDisponiveis.length)];
             comidasUsadas.push(comidaAtual);
@@ -252,7 +300,7 @@
 
         function prepararPassarCelular() {
             if (indiceJogadorAtual < jogadores.length) {
-                document.getElementById('texto-passar').innerText = `Vez de: ${jogadores[indiceJogadorAtual]}\n\n(Esconda o celular dos outros)`;
+                document.getElementById('texto-passar').innerText = `Vez de: ${jogadores[indiceJogadorAtual]}\n\n(Esconda o celular da vizinhança)`;
                 mostrarTela('tela-passar');
             } else {
                 iniciarPerguntas();
@@ -264,11 +312,11 @@
             document.getElementById('titulo-papel').innerText = `--- SEGREDO DE ${jogador.toUpperCase()} ---`;
             
             if (jogador === impostorAtual) {
-                document.getElementById('texto-papel').innerText = "🚨 VOCÊ É O IMPOSTOR! 🚨";
-                document.getElementById('texto-papel').style.color = "#ff4757";
+                document.getElementById('texto-papel').innerText = "🚨 VOCÊ É O FALSO CAIPIRA (IMPOSTOR)! 🚨";
+                document.getElementById('texto-papel').style.color = "#ff5252";
             } else {
-                document.getElementById('texto-papel').innerText = `✅ VOCÊ É CIDADÃO!\n\nA Comida é: ${comidaAtual}`;
-                document.getElementById('texto-papel').style.color = "#2ed573";
+                document.getElementById('texto-papel').innerText = `✅ VOCÊ É DA ROÇA!\n\nA Comida é:\n🌽 ${comidaAtual} 🌽`;
+                document.getElementById('texto-papel').style.color = "#69f0ae";
             }
             mostrarTela('tela-revelacao');
         }
@@ -360,9 +408,9 @@
             
             let textoInstrucao = document.getElementById('texto-instrucao-palpite');
             if (impostorFoiDescoberto) {
-                textoInstrucao.innerText = "🚨 Você foi descoberto! Mas ainda pode tentar adivinhar a comida secreta para ganhar 2 pontos de consolação!";
+                textoInstrucao.innerText = "🚨 Te pegaram na mentira! Mas cê ainda pode tentar adivinhar a comida da barraquinha para ganhar 2 pontos de consolação!";
             } else {
-                textoInstrucao.innerText = "🎉 Você enganou a todos! Agora tente adivinhar a comida secreta para ganhar MAIS 2 pontos extras!";
+                textoInstrucao.innerText = "🎉 Cê enganou a quadrilha toda! Agora tente adivinhar a comida pra ganhar MAIS 2 pontos extras!";
             }
 
             let outrasComidas = comidas.filter(c => c !== comidaAtual);
@@ -391,12 +439,12 @@
                 placar[impostorAtual] += 2;
             }
 
-            let resumo = `O impostor era: <b>${impostorAtual}</b>!<br><br>`;
+            let resumo = `O Falso Caipira era: <b>${impostorAtual}</b>!<br><br>`;
 
             if (impostorFoiDescoberto) {
-                resumo += `🚨 <b>A casa caiu!</b> A maioria votou certo e o Impostor foi pego.<br><br>`;
+                resumo += `🚨 <b>A casa caiu sô!</b> A maioria votou certo e o Impostor foi pego no flagra.<br><br>`;
             } else {
-                resumo += `🎉 <b>Enganou geral!</b> O Impostor sobreviveu à votação (+2 pts).<br><br>`;
+                resumo += `🎉 <b>Enganou geral!</b> O Impostor saiu de fininho da fogueira (+2 pts).<br><br>`;
             }
 
             if (acertouPalpite) {
