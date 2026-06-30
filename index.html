@@ -448,6 +448,9 @@
             let texto = document.getElementById('texto-resultado');
             let acertouPalpite = (palpite === comidaAtual);
 
+            // Pega a quantidade máxima de votos do empate
+            let maxVotos = votosRecebidos[jogadoresMaisVotados[0]];
+
             if (acertouPalpite) {
                 placar[impostorAtual] += 2;
             }
@@ -459,12 +462,13 @@
             } else {
                 if (jogadoresMaisVotados.length > 1) {
                     
-                    // --- MUDANÇA AQUI: Arrumando as vírgulas e o último "e" ---
+                    // --- AQUI ESTÁ A MÁGICA DAS VÍRGULAS ---
+                    // Pega todos os nomes, separa por vírgula, e coloca o "e" apenas no último
                     let nomesEmpatados = jogadoresMaisVotados.slice(0, -1).join(', ') + ' e ' + jogadoresMaisVotados[jogadoresMaisVotados.length - 1];
                     
-                    resumo += `⚖️ <b>Deu empate na roça!</b> Os mais votados foram: <b>${nomesEmpatados}</b>.<br>Como o povo não se decidiu, o Impostor saiu de fininho (+2 pts).<br><br>`;
+                    resumo += `⚖️ <b>Deu empate na roça!</b><br>Os mais votados foram: <b>${nomesEmpatados}</b> (com ${maxVotos} votos cada).<br>Como o povo não se decidiu, o Impostor saiu de fininho (+2 pts).<br><br>`;
                 } else {
-                    resumo += `🎉 <b>Enganou geral!</b> O mais votado (coitado) foi <b>${jogadoresMaisVotados[0]}</b>. O Impostor saiu ileso (+2 pts).<br><br>`;
+                    resumo += `🎉 <b>Enganou geral!</b><br>O mais votado (coitado) foi <b>${jogadoresMaisVotados[0]}</b>. O Impostor saiu ileso (+2 pts).<br><br>`;
                 }
             }
 
@@ -473,6 +477,21 @@
             } else {
                 resumo += `❌ <b>E errou o palpite!</b> A comida era ${comidaAtual}.`;
             }
+
+            // --- AQUI ESTÁ O PAINEL DE FOFOCA (Quem tomou voto) ---
+            resumo += `<br><br><hr style="border-top: 1px dashed #ffb300; margin: 15px 0;">`;
+            resumo += `<div style="font-size: 16px; text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">`;
+            resumo += `<b>🗳️ Quantidade de Votos:</b><br>`;
+            
+            // Ordena para mostrar quem tomou mais votos no topo
+            let votosOrdenados = Object.keys(votosRecebidos).sort((a, b) => votosRecebidos[b] - votosRecebidos[a]);
+            
+            votosOrdenados.forEach(j => {
+                if (votosRecebidos[j] > 0) {
+                    resumo += `• ${j}: ${votosRecebidos[j]} voto(s)<br>`;
+                }
+            });
+            resumo += `</div>`;
 
             texto.innerHTML = resumo;
             mostrarTela('tela-resultado');
