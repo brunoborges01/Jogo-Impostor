@@ -103,7 +103,7 @@
     <div id="tela-menu" class="tela ativa">
         <h1>Arraiá do Impostor 🌽🕵️‍♂️</h1>
         
-        <div class="sessao-box">
+        <div class="sessao-box" id="box-novo-jogador">
             <h3 style="margin-top: 0;">Novo Caipira</h3>
             <input type="text" id="novo-jogador" placeholder="Digite o nome do compadre...">
             <button onclick="adicionarJogador()">Confirmar</button>
@@ -184,17 +184,29 @@
         // --- MENU E JOGADORES ---
         function atualizarInterfaceMenu() {
             const divJogadores = document.getElementById('lista-jogadores-ui');
+            const boxNovoJogador = document.getElementById('box-novo-jogador');
+            
             document.getElementById('contagem-jogadores').innerText = jogadores.length;
             divJogadores.innerHTML = '';
+            
+            // Esconde a caixa de adicionar jogador se o jogo já iniciou
+            if (jogoJaIniciou) {
+                boxNovoJogador.style.display = 'none';
+            } else {
+                boxNovoJogador.style.display = 'block';
+            }
             
             if(jogadores.length === 0) {
                 divJogadores.innerHTML = '<p style="color: #bcaaa4; font-size: 14px; text-align: center;">Nenhum compadre na roda ainda.</p>';
             } else {
                 jogadores.forEach((j, index) => {
+                    // Só cria o botão "X" de remover se o jogo AINDA NÃO iniciou
+                    let botaoRemover = jogoJaIniciou ? '' : `<button class="btn-pequeno" onclick="removerJogador(${index})">X</button>`;
+                    
                     divJogadores.innerHTML += `
                         <div class="jogador-item">
                             <span>👒 ${j}</span>
-                            <button class="btn-pequeno" onclick="removerJogador(${index})">X</button>
+                            ${botaoRemover}
                         </div>`;
                 });
             }
