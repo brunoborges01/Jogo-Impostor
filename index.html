@@ -447,9 +447,6 @@
         function verificarPalpite(palpite) {
             let texto = document.getElementById('texto-resultado');
             let acertouPalpite = (palpite === comidaAtual);
-            
-            // Pega a quantidade máxima de votos do empate
-            let maxVotos = votosRecebidos[jogadoresMaisVotados[0]];
 
             if (acertouPalpite) {
                 placar[impostorAtual] += 2;
@@ -461,11 +458,13 @@
                 resumo += `🚨 <b>A casa caiu sô!</b> A maioria votou certo e o Impostor foi pego no flagra.<br><br>`;
             } else {
                 if (jogadoresMaisVotados.length > 1) {
-                    // Formata os nomes bonitinho (ex: "João, Maria e José")
-                    let nomesEmpatados = jogadoresMaisVotados.join(', ').replace(/, ([^,]*)$/, ' e $1');
-                    resumo += `⚖️ <b>Deu empate na roça!</b><br>Os mais votados foram: <b>${nomesEmpatados}</b> (com ${maxVotos} votos cada).<br>Como o povo não se decidiu, o Impostor saiu de fininho (+2 pts).<br><br>`;
+                    
+                    // --- MUDANÇA AQUI: Arrumando as vírgulas e o último "e" ---
+                    let nomesEmpatados = jogadoresMaisVotados.slice(0, -1).join(', ') + ' e ' + jogadoresMaisVotados[jogadoresMaisVotados.length - 1];
+                    
+                    resumo += `⚖️ <b>Deu empate na roça!</b> Os mais votados foram: <b>${nomesEmpatados}</b>.<br>Como o povo não se decidiu, o Impostor saiu de fininho (+2 pts).<br><br>`;
                 } else {
-                    resumo += `🎉 <b>Enganou geral!</b><br>O mais votado (coitado) foi <b>${jogadoresMaisVotados[0]}</b>. O Impostor saiu ileso (+2 pts).<br><br>`;
+                    resumo += `🎉 <b>Enganou geral!</b> O mais votado (coitado) foi <b>${jogadoresMaisVotados[0]}</b>. O Impostor saiu ileso (+2 pts).<br><br>`;
                 }
             }
 
@@ -474,21 +473,6 @@
             } else {
                 resumo += `❌ <b>E errou o palpite!</b> A comida era ${comidaAtual}.`;
             }
-
-            // --- NOVIDADE: Adiciona a lista completa e detalhada dos votos ---
-            resumo += `<br><br><hr style="border-top: 1px dashed #ffb300; margin: 15px 0;">`;
-            resumo += `<div style="font-size: 16px; text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">`;
-            resumo += `<b>🗳️ Quantidade de Votos:</b><br>`;
-            
-            // Ordena os jogadores para mostrar quem tomou mais votos no topo
-            let votosOrdenados = Object.keys(votosRecebidos).sort((a, b) => votosRecebidos[b] - votosRecebidos[a]);
-            
-            votosOrdenados.forEach(j => {
-                if (votosRecebidos[j] > 0) {
-                    resumo += `• ${j}: ${votosRecebidos[j]} voto(s)<br>`;
-                }
-            });
-            resumo += `</div>`;
 
             texto.innerHTML = resumo;
             mostrarTela('tela-resultado');
