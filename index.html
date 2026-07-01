@@ -7,12 +7,11 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* Fundo rústico escuro com textura que lembra um xadrez bem sutil */
             background-color: #2b1b11; 
             background-image: repeating-linear-gradient(45deg, rgba(255, 153, 0, 0.03) 25%, transparent 25%, transparent 75%, rgba(255, 153, 0, 0.03) 75%, rgba(255, 153, 0, 0.03)), 
                               repeating-linear-gradient(-45deg, rgba(255, 153, 0, 0.03) 25%, transparent 25%, transparent 75%, rgba(255, 153, 0, 0.03) 75%, rgba(255, 153, 0, 0.03));
             background-size: 40px 40px;
-            color: #fff3e0; /* Cor de palha clara */
+            color: #fff3e0; 
             margin: 0;
             padding: 20px;
             display: flex;
@@ -21,16 +20,16 @@
             text-align: center;
         }
         h1, h2, h3 { 
-            color: #ffb300; /* Amarelo milho */
+            color: #ffb300; 
             text-shadow: 2px 2px 4px rgba(0,0,0,0.6); 
         }
         .tela { display: none; width: 100%; max-width: 400px; }
         .tela.ativa { display: block; }
         
         button {
-            background-color: #d84315; /* Laranja/Vermelho tijolo */
+            background-color: #d84315; 
             color: #fff;
-            border: 2px dashed #ffb300; /* Borda estilo "remendo" */
+            border: 2px dashed #ffb300; 
             padding: 15px 20px;
             margin: 8px 0;
             border-radius: 8px;
@@ -72,15 +71,15 @@
             font-size: 16px;
             width: calc(100% - 34px);
             border-radius: 8px;
-            border: 2px dashed #ffb300; /* Remendo */
+            border: 2px dashed #ffb300;
             margin-bottom: 10px;
-            background-color: #4e342e; /* Marrom escuro */
+            background-color: #4e342e;
             color: #fff3e0;
         }
         input::placeholder { color: #bcaaa4; }
         
         .sessao-box { 
-            background: rgba(62, 39, 35, 0.95); /* Fundo amadeirado */
+            background: rgba(62, 39, 35, 0.95); 
             padding: 15px; 
             border-radius: 12px; 
             margin-bottom: 20px; 
@@ -119,7 +118,14 @@
             <div id="lista-placar"></div>
         </div>
 
-        <button onclick="iniciarJogo()" class="btn-verde">Puxar a Quadrilha (Iniciar)</button>
+        <button onclick="mostrarTelaCategoria()" class="btn-verde">Puxar a Quadrilha (Iniciar)</button>
+    </div>
+
+    <div id="tela-categoria" class="tela">
+        <h2>Escolha o Tema da Rodada 🎲</h2>
+        <button onclick="prepararRodada('comida')" class="btn-verde">🍔 Comida</button>
+        <button onclick="prepararRodada('objeto')" class="btn-verde">🪑 Objeto</button>
+        <button onclick="prepararRodada('animal')" class="btn-verde">🐶 Animal</button>
     </div>
 
     <div id="tela-passar" class="tela">
@@ -163,18 +169,29 @@
         let jogadores = [];
         let placar = {};
         let historicoImpostores = [];
-        let comidasUsadas = [];
         let jogoJaIniciou = false;
         let impostorFoiDescoberto = false; 
         let jogadoresMaisVotados = []; 
         let limitePartidas = 0; 
         let partidasJogadas = 0;
         
-        let comidas = ["Açaí", "Alfajor", "Arroz Doce", "Bacon", "Batata Frita", "Beijinho", "Bife à Parmegiana", "Bolo de Cenoura", "Brigadeiro", "Cachorro Quente", "Churros", "Coxinha", "Croissant", "Feijoada", "Hambúrguer", "Lasanha", "Macarrão", "Misto Quente", "Omelete", "Panqueca", "Pastel", "Pão de Queijo", "Pipoca", "Pizza", "Pudim", "Salada", "Sorvete", "Strogonoff", "Sushi", "Yakisoba"];
-        let perguntas = ["Você prefere comer isso no café da manhã, almoço, janta ou na madrugada?", "É o tipo de comida que você divide ou come escondido?", "Combina mais com refri, suco natural ou cerveja?", "Qual o molho não pode faltar?", "Fica melhor no dia seguinte requentado?", "Faz muita sujeira para comer no sofá?", "Dá para comer todo dia ou enjoa?", "Você prefere a versão caseira ou comprada?", "Comeria pelo resto da vida?", "É comida de dia frio ou ensolarado?", "Qual o acompanhamento perfeito?", "É comida de fim de semana ou de correria?", "Você come triste para dar aquela melhorada no humor?", "Você costuma pedir no delivery ou sair para comer?", "Já passou mal de tanto comer isso?", "É uma comida superestimada ou merece a fama?", "É uma comida que pesa ou dá pra comer um monte?", "Como é o cheiro que deixa na casa?", "Você costuma raspar o prato/panela?"];
+        let itensUsados = { comida: [], objeto: [], animal: [] };
+        
+        const comidas = ["Açaí", "Alfajor", "Arroz Doce", "Bacon", "Batata Frita", "Beijinho", "Bife à Parmegiana", "Bolo de Cenoura", "Brigadeiro", "Cachorro Quente", "Churros", "Coxinha", "Croissant", "Feijoada", "Hambúrguer", "Lasanha", "Macarrão", "Misto Quente", "Omelete", "Panqueca", "Pastel", "Pão de Queijo", "Pipoca", "Pizza", "Pudim", "Salada", "Sorvete", "Strogonoff", "Sushi", "Yakisoba"];
+        const perguntas_comidas = ["Você prefere comer isso no café da manhã, almoço, janta ou na madrugada?", "É o tipo de comida que você divide ou come escondido?", "Combina mais com refri, suco natural ou cerveja?", "Qual o molho não pode faltar?", "Fica melhor no dia seguinte requentado?", "Faz muita sujeira para comer no sofá?", "Dá para comer todo dia ou enjoa?", "Você prefere a versão caseira ou comprada?", "Comeria pelo resto da vida?", "É comida de dia frio ou ensolarado?", "Qual o acompanhamento perfeito?", "É comida de fim de semana ou de correria?", "Você come triste para dar aquela melhorada no humor?", "Você costuma pedir no delivery ou sair para comer?", "Já passou mal de tanto comer isso?", "É uma comida superestimada ou merece a fama?", "É uma comida que pesa ou dá pra comer um monte?", "Como é o cheiro que deixa na casa?", "Você costuma raspar o prato/panela?"];
+        
+        const objetos = ["Liquidificador", "Frigideira", "Abridor de Vinho", "Varal", "Vassoura", "Travesseiro", "Chuveiro", "Faca de Chef", "Cesto de Roupa", "Espelho", "Cafeteira", "Torradeira", "Micro-ondas", "Tapete", "Luminária", "Smartphone", "Notebook", "Relógio", "Livro", "Cadeira Gamer", "Tênis", "Fone de Ouvido", "Mochila", "Chave", "Carteira", "Óculos", "Teclado", "Mouse", "Garrafa de água", "Guarda-chuva", "Câmera", "Violão", "Carregador", "Monitor", "Cinto", "Caneta", "Agenda", "Toalha", "Abajur", "Ventilador", "Copo", "Prato", "Escova de dente", "Tesoura", "Martelo", "Furadeira", "Cobertor", "Sofá", "Mesa", "Alicate", "Chave de Fenda", "Nível", "Trena", "Parafusadeira", "Fita Adesiva", "Grampeador", "Pasta de Documentos", "Calculadora", "Calendário", "Pincel", "Paleta de cores", "Tripé", "Controle Remoto", "Roteador", "Teclado numérico", "Webcam", "Base de notebook", "Mousepad", "Cabo HDMI", "Adaptador de tomada", "Extensão elétrica", "Lanterna", "Pilhas", "Lâmpada", "Cabide", "Sapateira", "Caixa organizadora", "Etiquetadora", "Pasta suspensa", "Saca-rolhas", "Ralador", "Peneira", "Escorredor de pratos", "Tábua de corte", "Potes de vidro", "Tupperware", "Bule", "Xícara", "Coador de café", "Guardanapo", "Toalha de mesa", "Cortina", "Tapete de entrada", "Almofada", "Vaso de planta", "Regador", "Ferro de passar", "Tábua de passar", "Cabideiro"];
+        const perguntas_objeto = ["Em que cômodo da casa esse objeto normalmente fica?", "Você precisa de energia elétrica para fazê-lo funcionar?", "Qual é o principal material de que ele é feito?", "Esse objeto é mais pesado ou mais leve que uma cadeira?", "Ele é considerado uma ferramenta ou um item de conforto?", "Você consegue carregá-lo apenas com uma mão?", "A função dele é facilitar uma tarefa ou apenas decorar?", "Você usa esse objeto várias vezes ao dia ou esporadicamente?", "É um objeto que costuma ser compartilhado ou é de uso individual?", "Ele é algo que você guarda dentro de uma gaveta ou deixa exposto?", "Se esse objeto parasse de existir hoje, sua rotina seria muito prejudicada?", "Você costuma lavar esse objeto frequentemente?", "É um item que você sempre leva em viagens ou deixa fixo?", "Você sente algum tipo de prazer ou satisfação ao usá-lo?", "Ele é feito para durar anos ou é descartável com o tempo?", "Você compraria uma versão muito mais cara só pela marca?", "Qual é a cor mais comum que encontramos esse objeto no mercado?", "Ele emite algum som característico durante o uso?", "É um objeto que precisa de manutenção ou revisão técnica?", "Se ele fosse um animal, ele seria rápido ou lento?", "Você consegue descrever o formato dele sem usar as mãos?", "Ele pode ser perigoso se usado da maneira errada?", "Existe algum acessório que é indispensável para esse objeto?", "Você prefere ter um modelo simples ou um cheio de funções?", "Qual seria a primeira coisa que você faria se encontrasse esse objeto no meio da rua?", "Você acha que ele vai se tornar obsoleto nos próximos 10 anos?", "Qual é a maior frustração que alguém pode ter ao usar esse objeto?", "Ele combina mais com um ambiente de trabalho ou de descanso?", "Se você pudesse redesenhá-lo, o que mudaria primeiro?"];
+        
+        const animais = ["Cachorro", "Gato", "Leão", "Elefante", "Golfinho", "Coruja", "Águia", "Urso", "Cavalo", "Tigre", "Pinguim", "Lobo", "Macaco", "Tartaruga", "Coelho", "Raposa", "Borboleta", "Tubarão", "Cobra", "Hamster", "Baleia", "Girafa", "Zebra", "Arara", "Polvo", "Formiga", "Abelha", "Camelo", "Rinoceronte", "Jacaré", "Flamingo", "Sapo", "Escorpião", "Preguiça", "Canguru", "Papagaio", "Hiena", "Vaca", "Pato", "Corvo", "Galinha", "Serpente", "Foca", "Morcego", "Castor"];
+        const perguntasAnimais = ["Você teria coragem de adotar um desses como bicho de estimação?", "É um animal que você prefere observar de longe?", "Qual característica física você acha mais impressionante?", "Você acha que ele se pareceria com você em algum aspecto?", "Daria para conviver pacificamente na mesma casa?", "Você teria medo de encontrar um desses na natureza?", "Você acha esse animal elegante ou desengonçado?", "Se fosse um animal, você escolheria ser esse?", "Você acha que esse bicho é inteligente?", "Você prefere ver no zoológico ou em documentários?", "Você acha que ele é agressivo ou dócil?", "É um animal que você considera exótico?", "Você acha que ele traz sorte?", "Você já teve uma experiência real com um desses?", "Você acha que ele precisa de muito espaço para viver?", "Você considera esse animal bonito ou assustador?", "Você acha que ele seria um bom companheiro?", "O som que ele faz te agrada ou irrita?", "Você acha que ele deveria ser protegido com prioridade?", "Você acha que esse animal tem uma vida fácil?", "Você acha que ele é um sobrevivente nato?", "Você acha que ele sente empatia?", "Você já viu um desses de perto fora de telas?", "Para você, esse animal simboliza algo específico?", "Você acha que ele dorme muito ou pouco?", "Você acha que ele é sociável ou solitário?"];
         
         let impostorAtual = "";
-        let comidaAtual = "";
+        let itemSecretoAtual = "";
+        let categoriaAtualNome = "";
+        let listaItensAtual = [];
+        let listaPerguntasAtual = [];
+
         let indiceJogadorAtual = 0;
         let indicePerguntaAtual = 0;
         let p_perguntador = [];
@@ -184,17 +201,21 @@
 
         // --- MENU E JOGADORES ---
         function atualizarInterfaceMenu() {
-            const divJogadores = document.getElementById('lista-jogadores-ui');
-            const boxNovoJogador = document.getElementById('box-novo-jogador');
-            
-            document.getElementById('contagem-jogadores').innerText = jogadores.length;
-            divJogadores.innerHTML = '';
-            
-            if (jogoJaIniciou) {
-                boxNovoJogador.style.display = 'none';
-            } else {
-                boxNovoJogador.style.display = 'block';
-            }
+			const divJogadores = document.getElementById('lista-jogadores-ui');
+			const boxNovoJogador = document.getElementById('box-novo-jogador');
+			const boxJogadores = document.getElementById('box-jogadores'); // Nova linha capturando a caixa inteira
+			
+			document.getElementById('contagem-jogadores').innerText = jogadores.length;
+			divJogadores.innerHTML = '';
+			
+			// Controle de visibilidade após a primeira rodada
+			if (jogoJaIniciou) {
+				boxNovoJogador.style.display = 'none';
+				boxJogadores.style.display = 'none'; // Esconde o "Gente na Roda"
+			} else {
+				boxNovoJogador.style.display = 'block';
+				boxJogadores.style.display = 'block'; // Mostra apenas antes do jogo iniciar
+			}
             
             if(jogadores.length === 0) {
                 divJogadores.innerHTML = '<p style="color: #bcaaa4; font-size: 14px; text-align: center;">Nenhum compadre na roda ainda.</p>';
@@ -223,7 +244,6 @@
                     divPlacar.innerHTML += `<div class="placar-item"><span>${index + 1}º | ${j}</span> <strong>${placar[j]} pts</strong></div>`;
                 });
 
-                // Lógica do botão informativo
                 const btnIniciar = document.querySelector('.btn-verde');
                 if (partidasJogadas >= limitePartidas && limitePartidas > 0) {
                     btnIniciar.innerText = "Arraiá Encerrado! 🔥";
@@ -290,30 +310,48 @@
         }
 
         // --- LÓGICA DO JOGO ---
-        function iniciarJogo() {
+        function mostrarTelaCategoria() {
             if (jogadores.length < 3) { 
                 alert("Chama pelo menos 3 compadres pra jogar!"); 
                 return; 
             }
-
             if (partidasJogadas === 0) {
                 limitePartidas = jogadores.length;
             }
-
             if (partidasJogadas >= limitePartidas) {
                 return; 
             }
+            mostrarTela('tela-categoria');
+        }
 
+        function prepararRodada(categoria) {
             jogadores.forEach(j => { if (!(j in placar)) placar[j] = 0; });
+
+            let itensDisponiveis = [];
+
+            if (categoria === 'comida') {
+                listaItensAtual = comidas;
+                listaPerguntasAtual = perguntas_comidas;
+                categoriaAtualNome = "A Comida";
+            } else if (categoria === 'objeto') {
+                listaItensAtual = objetos;
+                listaPerguntasAtual = perguntas_objeto;
+                categoriaAtualNome = "O Objeto";
+            } else if (categoria === 'animal') {
+                listaItensAtual = animais;
+                listaPerguntasAtual = perguntasAnimais;
+                categoriaAtualNome = "O Animal";
+            }
+
+            itensDisponiveis = listaItensAtual.filter(i => !itensUsados[categoria].includes(i));
             
-            let comidasDisponiveis = comidas.filter(c => !comidasUsadas.includes(c));
-            if (comidasDisponiveis.length === 0) { 
-                alert("Vixe, a barraquinha zerou as comidas!"); 
+            if (itensDisponiveis.length === 0) { 
+                alert(`Vixe, a barraquinha zerou a lista de ${categoria}! Escolha outra categoria.`); 
                 return; 
             }
             
-            comidaAtual = comidasDisponiveis[Math.floor(Math.random() * comidasDisponiveis.length)];
-            comidasUsadas.push(comidaAtual);
+            itemSecretoAtual = itensDisponiveis[Math.floor(Math.random() * itensDisponiveis.length)];
+            itensUsados[categoria].push(itemSecretoAtual);
             
             let candidatos = [...jogadores];
             if (historicoImpostores.length >= 2) {
@@ -350,10 +388,8 @@
                 document.getElementById('texto-papel').innerText = "🚨 VOCÊ É O FALSO CAIPIRA (IMPOSTOR)! 🚨";
                 document.getElementById('texto-papel').style.color = "#ff5252";
             } else {
-                // Monta a base da mensagem
-                let mensagem = `✅ VOCÊ É DA ROÇA!\n\nA Comida é:\n${comidaAtual}`;
+                let mensagem = `✅ VOCÊ É DA ROÇA!\n\n${categoriaAtualNome} é:\n${itemSecretoAtual}`;
                 
-                // Verifica se é a primeira rodada (partidasJogadas está em 0)
                 if (partidasJogadas === 0) {
                     mensagem += "\n\nObservação: Estamos do mesmo lado Rapha!";
                 }
@@ -372,7 +408,7 @@
         function iniciarPerguntas() {
             p_perguntador = shuffle([...jogadores]);
             r_respondedor = p_perguntador.slice(1).concat(p_perguntador[0]);
-            perguntasSorteadas = shuffle([...perguntas]).slice(0, jogadores.length);
+            perguntasSorteadas = shuffle([...listaPerguntasAtual]).slice(0, jogadores.length);
             
             indicePerguntaAtual = 0;
             mostrarProximaPergunta();
@@ -432,10 +468,8 @@
             prepararVoto();
         }
 
-        // --- LÓGICA DE RESULTADO ATUALIZADA AQUI ---
         function calcularResultado() {
             let maxVotos = Math.max(...Object.values(votosRecebidos));
-            // Guarda na variável global todos que empataram com o máximo de votos
             jogadoresMaisVotados = Object.keys(votosRecebidos).filter(j => votosRecebidos[j] === maxVotos); 
             
             if (!jogadoresMaisVotados.includes(impostorAtual) || (jogadoresMaisVotados.length > 1 && jogadoresMaisVotados.includes(impostorAtual))) {
@@ -445,22 +479,24 @@
                 impostorFoiDescoberto = true;
             }
 
-            prepararPalpiteComida();
+            prepararPalpite();
         }
 
-        function prepararPalpiteComida() {
+        function prepararPalpite() {
             document.getElementById('nome-impostor-descoberto').innerText = impostorAtual;
             
             let textoInstrucao = document.getElementById('texto-instrucao-palpite');
+            let nomeDaCategoria = categoriaAtualNome.toLowerCase();
+
             if (impostorFoiDescoberto) {
-                textoInstrucao.innerText = "🚨 Te pegaram na mentira! Mas cê ainda pode tentar adivinhar a comida da barraquinha para ganhar 2 pontos de consolação!";
+                textoInstrucao.innerText = `🚨 Te pegaram na mentira! Mas cê ainda pode tentar adivinhar ${nomeDaCategoria} para ganhar 2 pontos de consolação!`;
             } else {
-                textoInstrucao.innerText = "🎉 Cê enganou a quadrilha toda! Agora tente adivinhar a comida pra ganhar MAIS 2 pontos extras!";
+                textoInstrucao.innerText = `🎉 Cê enganou a quadrilha toda! Agora tente adivinhar ${nomeDaCategoria} pra ganhar MAIS 2 pontos extras!`;
             }
 
-            let outrasComidas = comidas.filter(c => c !== comidaAtual);
-            let opcoes = shuffle(outrasComidas).slice(0, 4);
-            opcoes.push(comidaAtual);
+            let outrosItens = listaItensAtual.filter(c => c !== itemSecretoAtual);
+            let opcoes = shuffle(outrosItens).slice(0, 4);
+            opcoes.push(itemSecretoAtual);
             opcoes = shuffle(opcoes);
 
             let divBotoes = document.getElementById('botoes-palpite');
@@ -477,38 +513,34 @@
         }
 
         function verificarPalpite(palpite) {
-    let texto = document.getElementById('texto-resultado');
-    let acertouPalpite = (palpite === comidaAtual);
+            let texto = document.getElementById('texto-resultado');
+            let acertouPalpite = (palpite === itemSecretoAtual);
 
-    let maxVotos = votosRecebidos[jogadoresMaisVotados[0]];
+            if (acertouPalpite) {
+                placar[impostorAtual] += 2;
+            }
 
-    if (acertouPalpite) {
-        placar[impostorAtual] += 2;
-    }
+            partidasJogadas++;
 
-    // Incrementa o contador de partidas
-    partidasJogadas++;
+            let resumo = `O Falso Caipira era: <b>${impostorAtual}</b>!<br><br>`;
 
-    let resumo = `O Falso Caipira era: <b>${impostorAtual}</b>!<br><br>`;
+            if (impostorFoiDescoberto) {
+                resumo += `🚨 <b>A casa caiu sô!</b> A maioria votou certo e o Impostor foi pego no flagra.<br><br>`;
+            } else {
+                if (jogadoresMaisVotados.length > 1) {
+                    let nomesEmpatados = jogadoresMaisVotados.join(', ');
+                    resumo += `⚖️ <b>Deu empate na roça!</b><br>Os mais votados foram: <b>${nomesEmpatados}</b>.<br><br>`;
+                } else {
+                    resumo += `🎉 <b>Enganou geral!</b><br>O mais votado foi <b>${jogadoresMaisVotados[0]}</b>.<br><br>`;
+                }
+            }
 
-    if (impostorFoiDescoberto) {
-        resumo += `🚨 <b>A casa caiu sô!</b> A maioria votou certo e o Impostor foi pego no flagra.<br><br>`;
-    } else {
-        if (jogadoresMaisVotados.length > 1) {
-            let nomesEmpatados = jogadoresMaisVotados.join(', ');
-            resumo += `⚖️ <b>Deu empate na roça!</b><br>Os mais votados foram: <b>${nomesEmpatados}</b>.<br><br>`;
-        } else {
-            resumo += `🎉 <b>Enganou geral!</b><br>O mais votado foi <b>${jogadoresMaisVotados[0]}</b>.<br><br>`;
+            resumo += acertouPalpite ? `🎯 <b>Acertou o palpite!</b>` : `❌ <b>Errou o palpite! A resposta certa era ${itemSecretoAtual}.</b>`;
+            resumo += `<br><br><b>Rodada ${partidasJogadas} de ${limitePartidas}</b>`;
+
+            texto.innerHTML = resumo;
+            mostrarTela('tela-resultado');
         }
-    }
-
-    resumo += acertouPalpite ? `🎯 <b>Acertou o palpite!</b>` : `❌ <b>Errou o palpite!</b>`;
-    resumo += `<br><br><b>Rodada ${partidasJogadas} de ${limitePartidas}</b>`;
-
-    
-    texto.innerHTML = resumo;
-    mostrarTela('tela-resultado');
-}
 
         // Inicialização
         atualizarInterfaceMenu();
